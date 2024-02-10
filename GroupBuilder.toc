@@ -1,0 +1,12 @@
+## Interface: 30400
+## Author: Mageiden
+## Title: GroupBuilder
+## Notes: Forms groups for you.
+## DefaultState: enabled
+## Version: v0.0.1
+## SavedVariables: GroupBuilderDB
+embeds.xml
+Constants.lua
+
+Config.lua
+GroupBuilder.lua
