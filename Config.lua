@@ -7,10 +7,10 @@ local GBConfig;
 
 local defaults = {
     profile = {
-        healers = 0,
-        dps = 0,
-        tanks = 0,
-        gearscore = 0,
+        maxHealers = 0,
+        maxDPS = 0,
+        maxTanks = 0,
+        minGearscore = 0,
         maxRangedDPS = 0,
         maxMeleeDPS = 0,
         message = "",
@@ -66,36 +66,36 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.tanks = tonumber(value);
+                            core.db.profile.maxTanks = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.tanks);
+                            return tostring(core.db.profile.maxTanks);
                         end
                     }, 
-                    healers = {
+                    maxHealers = {
                         order = 2,
                         name = "Healers",
                         desc = "Number of healers",
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.healers = tonumber(value);
+                            core.db.profile.maxHealers = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.healers);
+                            return tostring(core.db.profile.maxHealers);
                         end
                     },
-                    dps = {
+                    maxDPS = {
                         order = 3,
                         name = "DPS",
                         desc = "Number of DPS",
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.dps = tonumber(value);
+                            core.db.profile.maxDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.dps);
+                            return tostring(core.db.profile.maxDPS);
                         end
                     },
                     maxRangedDPS = {
@@ -131,10 +131,10 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.gearscore = tonumber(value);
+                            core.db.profile.minGearscore = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.gearscore);
+                            return tostring(core.db.profile.minGearscore);
                         end
                     }
                 }
@@ -144,12 +144,18 @@ function Config:CreateMenu()
                 type = "execute",
                 name = function ()
                     if core.db.profile.isPaused then
-                        return "Start Group";
+                        return "Activate Auto Inviting";
                     else
-                        return "Pause";
+                        return "Pause Auto inviting";
                     end
                 end,
-                desc = "Pause the auto inviting.",
+                desc = function ()
+                    if core.db.profile.isPaused then
+                        return "Activate auto inviting";
+                    else
+                        return "Pause auto inviting";
+                    end
+                end,
                 func = function()
                    core.db.profile.isPaused = not core.db.profile.isPaused; 
                 end,

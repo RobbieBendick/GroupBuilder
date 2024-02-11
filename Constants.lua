@@ -19,10 +19,9 @@ core.eventHandlerTable = {
             if playerRole and not core.raidTable[name] then
                 -- add to raid table
                 core.raidTable[name] = core.invitedTable[name];
-                if core.invitedTable[name] then
-                    -- remove from inv table
-                    core.invitedTable[name] = nil; 
-                end
+                
+                -- remove from inv table
+                core.invitedTable[name] = nil; 
             end
         end
     end

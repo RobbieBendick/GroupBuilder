@@ -18,32 +18,6 @@ function GB:AddonLoaded(self, addonName)
     end
 end
 
-function GB:FindGearscore(message)
-    local keywordPattern = "(%d+%.?%d*)%s*[kK]?%s*gs%s*";
-    local keywordPatternWithGearscore = "(%d+%.?%d*)%s*[kK]?%s*gearscore%s*";
-    local keywordPatternWithGearScore = "(%d+%.?%d*)%s*[kK]?%s*gear%s*score%s*";
-    local gearscoreNumber;
-
-    for number in message:gmatch(keywordPattern) do
-        -- extract only the numeric value from the matched string
-        gearscoreNumber = tonumber(number);
-    end
-    if not gearscoreNumber then
-        for number in message:gmatch(keywordPatternWithGearscore) do
-            -- extract only the numeric value from the matched string
-            gearscoreNumber = tonumber(number);
-        end
-    end
-    if not gearscoreNumber then
-        for number in message:gmatch(keywordPatternWithGearScore) do
-            -- extract only the numeric value from the matched string
-            gearscoreNumber = tonumber(number);
-        end
-    end
-
-    return gearscoreNumber;
-end
-
 function GB:CountPlayersByRole(table, role)
     local count = 0;
     if role == "dps" then
@@ -68,47 +42,51 @@ function GB:FindRole(message)
         for _, value in ipairs(values) do
             if message:lower():find(value) then
                 foundRole = role;
-                break;  -- no need to continue checking other values once one is found
+                break;
             end
         end
         if foundRole then
-            break;  -- no need to continue checking other roles once one is found
+            break;
         end
     end
     return foundRole;
 end
 
 function GB:FindGearscore(message)
-    local keywordPattern = "(%d+%.?%d*)%s*[kK]?%s*gs%s*";
-    local keywordPatternWithGearscore = "(%d+%.?%d*)%s*[kK]?%s*gearscore%s*";
-    local keywordPatternWithGearScore = "(%d+%.?%d*)%s*[kK]?%s*gear%s*score%s*";
-    local gearscoreNumber;
+    local keywordPatternWithGS = "(%d+%.?%d*)([kK]?)%s*gs%s*";
+    local keywordPatternWithGearscore = "(%d+%.?%d*)([kK]?)%s*gearscore%s*";
+    local keywordPatternWithGearscoreSpace = "(%d+%.?%d*)([kK]?)%s*gear%s*score%s*";
+    local gearscoreNumber
 
-    for number in message:gmatch(keywordPattern) do
-        -- extract only the numeric value from the matched string
+    for number, k in message:lower():gmatch(keywordPatternWithGS) do
         gearscoreNumber = tonumber(number);
-        -- check if "k" or "K" is present and multiply by 1000 if so
-        if message:lower():find("k", 1, true) then
+
+        if k:lower() == "k" then
             gearscoreNumber = gearscoreNumber * 1000;
+            print('gearScoreNumber:', gearscoreNumber);
+            break;
         end
     end
+
     if not gearscoreNumber then
-        for number in message:gmatch(keywordPatternWithGearscore) do
-            -- extract only the numeric value from the matched string
-            gearscoreNumber = tonumber(number);
-            -- check if "k" or "K" is present and multiply by 1000 if so
-            if message:lower():find("k", 1, true) then
+        for number, k in message:lower():gmatch(keywordPatternWithGearscore) do
+            gearscoreNumber = tonumber(number)
+
+            if k:lower() == "k" then
                 gearscoreNumber = gearscoreNumber * 1000;
+                print('gearScoreNumber:', gearscoreNumber);
+                break;
             end
         end
     end
+
     if not gearscoreNumber then
-        for number in message:gmatch(keywordPatternWithGearScore) do
-            -- extract only the numeric value from the matched string
+        for number, k in message:lower():gmatch(keywordPatternWithGearscoreSpace) do
             gearscoreNumber = tonumber(number);
-            -- check if "k" or "K" is present and multiply by 1000 if so
-            if message:lower():find("k", 1, true) then
+
+            if k:lower() == "k" then
                 gearscoreNumber = gearscoreNumber * 1000;
+                break;
             end
         end
     end
@@ -116,48 +94,45 @@ function GB:FindGearscore(message)
     return gearscoreNumber;
 end
 
+
 function GB:HandleWhispers(message, sender, ...)
     if core.db.profile.isPaused then return end
-    local characterName = sender:match("([^%-]+)")
     local gearscoreNumber = GB:FindGearscore(message);
-    if not gearscoreNumber then return print('no gs') end
+    if not gearscoreNumber then return end
 
     local role = GB:FindRole(message);
-    if not role then return print('no role') end
-    print('gearscoreNumber: ', gearscoreNumber);
-    print('minGearscore: ', core.db.profile.gearscore);
+    if not role then return end
 
-    if gearscoreNumber < tonumber(core.db.profile.gearscore) then return print('gs too low') end
-    if role == "ranged_dps" then
-        print(GB:CountPlayersByRole("dps"))
-        
-        if GB:CountPlayersByRole("dps") >= core.db.profile.dps or GB:CountPlayersByRole(role) >= core.db.profile.maxRangedDPS then return print('Too many '.. role) end
+    if gearscoreNumber < tonumber(core.db.profile.gearscore) then return end
+    if role == "ranged_dps" then        
+        if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= core.db.profile.maxRangedDPS then return end
     end
 
     if role == "melee_dps" then
-        if GB:CountPlayersByRole("dps") >= core.db.profile.dps or GB:CountPlayersByRole(role) >= core.db.profile.maxMeleeDPS then return print('Too many '.. role) end
+        if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= core.db.profile.maxMeleeDPS then return end
     end
 
     if role == "tank" then
-        if GB:CountPlayersByRole(role) >= core.db.profile.tanks then return print('Too many '.. role) end
+        if GB:CountPlayersByRole(role) >= core.db.profile.maxTanks then return end
     end
 
     if role == "healer" then
-        if GB:CountPlayersByRole(role) >= core.db.profile.healers then return print('Too many '.. role) end
+        if GB:CountPlayersByRole(role) >= core.db.profile.maxHealers then return end
     end
+    
+    local senderCharacterName = sender:match("([^%-]+)");
 
-    print('robdog 2')
     -- invite them
     C_Timer.After(math.random(4, 10), function ()
-        print('inviting ', characterName);
-        InviteUnit(characterName);
-        core.invitedTable[characterName] = role;
+        print('inviting ', senderCharacterName);
+        InviteUnit(senderCharacterName);
+        core.invitedTable[senderCharacterName] = role;
     end)
 
     -- remove them from invited table if invite expires
     C_Timer.After(122 + 10, function ()
-        if not core.raidTable[sender] then
-            core.invitedTable[characterName] = nil;
+        if not core.raidTable[senderCharacterName] then
+            core.invitedTable[senderCharacterName] = nil;
         end
     end);
 end
