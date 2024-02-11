@@ -1,5 +1,5 @@
 local _, core = ...;
-local ArenaMarker = _G.LibStub("AceAddon-3.0"):NewAddon(core.addonName, "AceConsole-3.0", "AceEvent-3.0");
+local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon(core.addonName, "AceConsole-3.0", "AceEvent-3.0");
 
 local Config = core.Config;
 core.GB = {};
@@ -56,40 +56,25 @@ function GB:FindGearscore(message)
     local keywordPatternWithGS = "(%d+%.?%d*)([kK]?)%s*gs%s*";
     local keywordPatternWithGearscore = "(%d+%.?%d*)([kK]?)%s*gearscore%s*";
     local keywordPatternWithGearscoreSpace = "(%d+%.?%d*)([kK]?)%s*gear%s*score%s*";
-    local gearscoreNumber
+    local gearscoreNumber;
 
-    for number, k in message:lower():gmatch(keywordPatternWithGS) do
-        gearscoreNumber = tonumber(number);
-
-        if k:lower() == "k" then
-            gearscoreNumber = gearscoreNumber * 1000;
-            print('gearScoreNumber:', gearscoreNumber);
-            break;
-        end
-    end
-
-    if not gearscoreNumber then
-        for number, k in message:lower():gmatch(keywordPatternWithGearscore) do
-            gearscoreNumber = tonumber(number)
-
-            if k:lower() == "k" then
-                gearscoreNumber = gearscoreNumber * 1000;
-                print('gearScoreNumber:', gearscoreNumber);
-                break;
+    function checkMessageForPattern(pattern)
+        if not gearscoreNumber then
+            for number, k in message:lower():gmatch(pattern) do
+                gearscoreNumber = tonumber(number)
+    
+                if k:lower() == "k" then
+                    gearscoreNumber = gearscoreNumber * 1000;
+                    print('gearScoreNumber:', gearscoreNumber);
+                    break;
+                end
             end
         end
     end
 
-    if not gearscoreNumber then
-        for number, k in message:lower():gmatch(keywordPatternWithGearscoreSpace) do
-            gearscoreNumber = tonumber(number);
-
-            if k:lower() == "k" then
-                gearscoreNumber = gearscoreNumber * 1000;
-                break;
-            end
-        end
-    end
+    checkMessageForPattern(keywordPatternWithGS);
+    checkMessageForPattern(keywordPatternWithGearscore);
+    checkMessageForPattern(keywordPatternWithGearscoreSpace);
 
     return gearscoreNumber;
 end
