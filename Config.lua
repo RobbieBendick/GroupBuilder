@@ -4,7 +4,6 @@ core.Config = {};
 local Config = core.Config;
 local GBConfig;
 
-
 local defaults = {
     profile = {
         maxHealers = 0,
@@ -51,7 +50,10 @@ function Config:CreateMenu()
                 end,
                 get = function(info) 
                     return core.db.profile.message;
-                end
+                end,
+                validate = function(info, value)
+                    return string.len(value) <= 255;
+                end,
             },
             group1 = {
                 order = 2,

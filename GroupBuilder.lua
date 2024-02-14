@@ -1,22 +1,8 @@
 local _, core = ...;
 local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon(core.addonName, "AceConsole-3.0", "AceEvent-3.0");
-
 local Config = core.Config;
 core.GB = {};
 GB = core.GB;
-
-local addonLoadedFrame = CreateFrame("Frame");
-addonLoadedFrame:RegisterEvent("ADDON_LOADED");
-local eventFrame = CreateFrame("Frame");
-
-function GB:AddonLoaded(self, addonName)
-    -- register all relevant events
-    if addonName == core.addonName then
-        for event, func in pairs(core.eventHandlerTable) do
-            eventFrame:RegisterEvent(event);
-        end
-    end
-end
 
 function GB:CountPlayersByRole(table, role)
     local count = 0;
@@ -38,9 +24,9 @@ end
 
 function GB:FindRole(message)
     local foundRole;
-    for role, values in pairs(core.roles) do
-        for _, value in ipairs(values) do
-            if message:lower():find(value) then
+    for role, keyWords in pairs(core.roles) do
+        for _, keyWord in ipairs(keyWords) do
+            if message:lower():find(keyWord) then
                 foundRole = role;
                 break;
             end
@@ -65,7 +51,6 @@ function GB:FindGearscore(message)
     
                 if k:lower() == "k" then
                     gearscoreNumber = gearscoreNumber * 1000;
-                    print('gearScoreNumber:', gearscoreNumber);
                     break;
                 end
             end
@@ -107,21 +92,36 @@ function GB:HandleWhispers(message, sender, ...)
     
     local senderCharacterName = sender:match("([^%-]+)");
 
+    local maxTimeForInvite = 10;
+
     -- invite them
-    C_Timer.After(math.random(4, 10), function ()
+    C_Timer.After(math.random(4, maxTimeForInvite), function ()
         print('inviting ', senderCharacterName);
         InviteUnit(senderCharacterName);
         core.invitedTable[senderCharacterName] = role;
     end)
 
     -- remove them from invited table if invite expires
-    C_Timer.After(122 + 10, function ()
+    C_Timer.After(122 + maxTimeForInvite, function ()
+        -- if the player is not in raid but in the invited table
         if not core.raidTable[senderCharacterName] then
             core.invitedTable[senderCharacterName] = nil;
         end
     end);
 end
 
+local addonLoadedFrame = CreateFrame("Frame");
+addonLoadedFrame:RegisterEvent("ADDON_LOADED");
+local eventFrame = CreateFrame("Frame");
+
+function GB:AddonLoaded(self, addonName)
+    -- register all relevant events
+    if addonName == core.addonName then
+        for event, func in pairs(core.eventHandlerTable) do
+            eventFrame:RegisterEvent(event);
+        end
+    end
+end
 
 -- event handler
 function GB:EventHandler(event, ...)
