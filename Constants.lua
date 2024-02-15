@@ -18,7 +18,6 @@ core.roles = {
         "disc",
         "hpal",
         "holy pal",
-        "holy paladin",
         "hpal"
     },
     ["tank"] = {
@@ -36,6 +35,7 @@ core.roles = {
         "rog",
         "feral",
         "enh",
+        "war",
         "enhancement",
         "enhance",
         "fury warr",
@@ -44,6 +44,7 @@ core.roles = {
         "fwar",
         "ret",
         "retribution",
+        "warrior",
     },
     ["ranged_dps"] = {
         "hunter",
@@ -57,4 +58,4 @@ core.roles = {
         "spriest",
         "shadow"
     },
-}
+};

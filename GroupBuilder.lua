@@ -43,17 +43,17 @@ function GB:FindGearscore(message)
     local keywordPatternWithGS = "(%d+%.?%d*)([kK]?)%s*gs%s*";
     local keywordPatternWithGearscore = "(%d+%.?%d*)([kK]?)%s*gearscore%s*";
     local keywordPatternWithGearscoreSpace = "(%d+%.?%d*)([kK]?)%s*gear%s*score%s*";
+    local rolePattern = "(%d+%.?%d*)([kK]?)%s*(%a+)";
     local gearscoreNumber;
 
     function checkMessageForPattern(pattern)
-        if not gearscoreNumber then
-            for number, k in message:lower():gmatch(pattern) do
-                gearscoreNumber = tonumber(number)
-    
-                if k:lower() == "k" then
-                    gearscoreNumber = gearscoreNumber * 1000;
-                    break;
-                end
+        if gearscoreNumber then return gearscoreNumber end
+        for number, k in message:lower():gmatch(pattern) do
+            gearscoreNumber = tonumber(number)
+
+            if k:lower() == "k" then
+                gearscoreNumber = gearscoreNumber * 1000;
+                break;
             end
         end
     end
@@ -62,8 +62,22 @@ function GB:FindGearscore(message)
     checkMessageForPattern(keywordPatternWithGearscore);
     checkMessageForPattern(keywordPatternWithGearscoreSpace);
 
+    if gearscoreNumber then return gearscoreNumber end
+
+    -- check for pattern with number followed by a role
+    for number, k, role in message:lower():gmatch(rolePattern) do
+        gearscoreNumber = tonumber(number);
+
+        if k:lower() == "k" then
+            gearscoreNumber = gearscoreNumber * 1000;
+        end
+
+        break;
+    end
+
     return gearscoreNumber;
 end
+
 
 
 function GB:HandleWhispers(message, sender, ...)
@@ -75,38 +89,37 @@ function GB:HandleWhispers(message, sender, ...)
     if not role then return end
 
     if gearscoreNumber < tonumber(core.db.profile.minGearscore) then return end
-
-    if role == "ranged_dps" then        
-        if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= core.db.profile.maxRangedDPS then return end
-    end
-
-    if role == "melee_dps" then
-        if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= core.db.profile.maxMeleeDPS then return end
-    end
-
-    if role == "tank" then
-        if GB:CountPlayersByRole(role) >= core.db.profile.maxTanks then return end
-    end
-
-    if role == "healer" then
-        if GB:CountPlayersByRole(role) >= core.db.profile.maxHealers then return end
-    end
     
+    local maxRoleValues = {
+        ["ranged_dps"] = core.db.profile.maxRangedDPS,
+        ["melee_dps"] = core.db.profile.maxMeleeDPS,
+        ["tank"] = core.db.profile.maxTanks,
+        ["healer"] = core.db.profile.maxHealers
+    };
+    
+    for role, max in pairs(maxRoleValues) do
+        if role == "ranged_dps" or role == "melee_dps" then
+            if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= max then return end
+        else
+            if GB:CountPlayersByRole(role) >= max then return end
+        end
+    end
+
     local senderCharacterName = sender:match("([^%-]+)");
 
-    local maxTimeForInvite = 10;
-
     -- invite them
-    C_Timer.After(math.random(4, maxTimeForInvite), function ()
+    local maxTimeToInvite = 10;
+    C_Timer.After(math.random(4, maxTimeToInvite), function ()
         print('inviting ', senderCharacterName);
         InviteUnit(senderCharacterName);
         core.invitedTable[senderCharacterName] = role;
     end)
 
+    local inviteExpirationTime = 122;
     -- remove them from invited table if invite expires
-    C_Timer.After(122 + maxTimeForInvite, function ()
-        -- if the player is not in raid but in the invited table
-        if not core.raidTable[senderCharacterName] then
+    C_Timer.After(inviteExpirationTime + maxTimeToInvite, function ()
+        -- if the player is not in raid but is in the invited table
+        if not core.raidTable[senderCharacterName] then 
             core.invitedTable[senderCharacterName] = nil;
         end
     end);
