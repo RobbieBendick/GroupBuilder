@@ -22,6 +22,7 @@ function GB:CountPlayersByRole(table, role)
     return count;
 end
 
+
 function GB:FindRole(message)
     local foundRole;
     for role, keyWords in pairs(core.roles) do
@@ -73,7 +74,8 @@ function GB:HandleWhispers(message, sender, ...)
     local role = GB:FindRole(message);
     if not role then return end
 
-    if gearscoreNumber < tonumber(core.db.profile.gearscore) then return end
+    if gearscoreNumber < tonumber(core.db.profile.minGearscore) then return end
+
     if role == "ranged_dps" then        
         if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= core.db.profile.maxRangedDPS then return end
     end
@@ -109,6 +111,21 @@ function GB:HandleWhispers(message, sender, ...)
         end
     end);
 end
+
+function GB:HandleGroupRosterUpdate(self, ...)
+    for i = 1, GetNumGroupMembers() do
+        local name = GetRaidRosterInfo(i);
+        local playerRole = core.invitedTable[name];
+        if playerRole and not core.raidTable[name] then
+            -- add to raid table
+            core.raidTable[name] = core.invitedTable[name];
+            
+            -- remove from inv table
+            core.invitedTable[name] = nil; 
+        end
+    end
+end
+
 
 local addonLoadedFrame = CreateFrame("Frame");
 addonLoadedFrame:RegisterEvent("ADDON_LOADED");

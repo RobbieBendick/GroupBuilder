@@ -2,31 +2,12 @@ local _, core = ...;
 core.addonName = "GroupBuilder";
 core.raidTable = {};
 core.invitedTable = {};
--- both tables are going to look like this: table = {
-   -- ["CharacterName"] = role
--- }
--- when invited, store into "invited" table.
--- when a player joins group, cross reference the invited table and see what role they have
--- if two minutes pass without the player joining the group, remove from table
 
 core.eventHandlerTable = {
 	["PLAYER_LOGIN"] = function(self) core.Config:OnInitialize(self) end,
     ["CHAT_MSG_WHISPER"] = function(self, ...) core.GB.HandleWhispers(self, ...) end,
-    ["GROUP_ROSTER_UPDATE"] = function (self, ...)
-        for i = 1, GetNumGroupMembers() do
-            local name = GetRaidRosterInfo(i);
-            local playerRole = core.invitedTable[name];
-            if playerRole and not core.raidTable[name] then
-                -- add to raid table
-                core.raidTable[name] = core.invitedTable[name];
-                
-                -- remove from inv table
-                core.invitedTable[name] = nil; 
-            end
-        end
-    end
+    ["GROUP_ROSTER_UPDATE"] = function (self, ...) core.GB.HandleGroupRosterUpdate(self, ...) end
 };
-
 
 core.roles = {
     ["healer"] = {
@@ -38,7 +19,6 @@ core.roles = {
         "hpal",
         "holy pal",
         "holy paladin",
-        "pal",
         "hpal"
     },
     ["tank"] = {
@@ -62,6 +42,8 @@ core.roles = {
         "dps warr",
         "warr dps",
         "fwar",
+        "ret",
+        "retribution",
     },
     ["ranged_dps"] = {
         "hunter",

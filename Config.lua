@@ -23,8 +23,6 @@ function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
 end
 
-local frame = CreateFrame("Frame");
-
 function Config:CreateMenu()
     GBConfig = CreateFrame("Frame", "GroupBuilderConfig", UIParent);
 
@@ -167,8 +165,8 @@ function Config:CreateMenu()
     }   
     
 
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("GroupBuilder", options)
-    self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder")
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("GroupBuilder", options);
+    self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
 
     GBConfig:Hide();
 end
@@ -207,14 +205,9 @@ function Config:CreateMinimapIcon()
 end
 
 function Config:OnInitialize()
-    if not GroupBuilderDB then
-        GroupBuilderDB = {};
-    end
-
     -- initialize saved variables with defaults
-    core.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true)
+    core.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
 
     Config:CreateMinimapIcon();
     Config:CreateMenu();
-
 end
