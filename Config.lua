@@ -203,8 +203,7 @@ function Config:CreateMenu()
                 width = "full",
             },
         }
-    }   
-    
+    }
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("GroupBuilder", options);
     self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
@@ -212,8 +211,37 @@ function Config:CreateMenu()
     GBConfig:Hide();
 end
 
+function Config:IsInLookingForGroup()
+    for i = 1, GetNumDisplayChannels() do
+        local id, channelName = GetChannelName(i)
+        if channelName == "LookingForGroup" then
+            return true;
+        end
+    end
+    return false;
+end
+
+function Config:FindLFGChannelIndex()
+    for i = 1, GetNumDisplayChannels() do
+        local id, channelName = GetChannelName(i);
+        if channelName == "LookingForGroup" then
+            return id;
+        end
+    end
+    return nil;
+end
+
 function Advertise()
-    SendChatMessage(core.db.profile.message or "", "CHANNEL", nil, 2);
+    if not core.db.profile.message then 
+        return print("Please enter an advertisement message.");
+    end
+    if Config:IsInLookingForGroup() then
+        local lookingForGroupChannelID = Config:FindLFGChannelIndex();
+        SendChatMessage(core.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
+    else
+        ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, "LookingForGroup");
+        print("Advertisement failed because you're not in the LookingForGroup channel. Joining now... Please advertise again when you're ready.")
+    end
 end
 
 function Config:CreateMinimapIcon()
