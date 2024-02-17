@@ -1,8 +1,6 @@
 local _, core = ...;
 local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon(core.addonName, "AceConsole-3.0", "AceEvent-3.0");
 local Config = core.Config;
-core.GB = {};
-GB = core.GB;
 
 function GB:CountPlayersByRole(table, role)
     local count = 0;
@@ -71,10 +69,8 @@ function GB:FindGearscore(message)
         if k:lower() == "k" then
             gearscoreNumber = gearscoreNumber * 1000;
         end
-
         break;
     end
-
     return gearscoreNumber;
 end
 
@@ -85,7 +81,6 @@ end
 function GB:IsInInvitedTable(name)
     return core.invitedTable[name] ~= nil;
 end
-
 
 function GB:HandleWhispers(message, sender, ...)
     if core.db.profile.isPaused then return end
@@ -130,6 +125,12 @@ function GB:HandleWhispers(message, sender, ...)
             core.invitedTable[senderCharacterName] = nil;
         end
     end);
+end
+
+function GB:HandleErrorMessages(msg)
+    if not msg:find("is already in a group") then return end
+    local playerName = msg:match("(%S+)");
+    core.invitedTable[playerName] = nil;
 end
 
 function GB:HandleGroupRosterUpdate(self, ...)

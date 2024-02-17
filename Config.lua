@@ -3,7 +3,7 @@ local LibDBIcon = LibStub("LibDBIcon-1.0");
 core.Config = {};
 local Config = core.Config;
 local GBConfig;
-
+local GB = core.GB;
 local defaults = {
     profile = {
         maxHealers = 0,
@@ -14,10 +14,11 @@ local defaults = {
         maxMeleeDPS = 0,
         message = "",
         minimapCoords = {},
-        isPaused = true;
+        isPaused = true,
+        selectedRaid = "",
+        selectedRole = "",
     }
 }
-
 function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
@@ -50,11 +51,51 @@ function Config:CreateMenu()
                     return core.db.profile.message;
                 end,
                 validate = function(info, value)
-                    return value:len() <= 255;
+                    return #value <= 255;
                 end,
             },
-            group1 = {
+            roleDropdown = {
                 order = 2,
+                type = "select",
+                name = "Select Your Role",
+                desc = "Select your role.",
+                values = {
+                    ["ranged_dps"] = "Ranged DPS",
+                    ["melee_dps"] = "Melee DPS",
+                    ["tank"] = "Tank",
+                    ["healer"] = "Healer",
+                },
+                width = "full",
+                set = function(info, value)
+                    core.db.profile.selectedRole = value;
+                    GB.raidTemplates[core.db.profile.selectedRaid]();
+                end,
+                get = function(info)
+                    return core.db.profile.selectedRole;
+                end,
+            },
+            raidDropdown = {
+                order = 3,
+                type = "select",
+                name = "Select Raid Template",
+                desc = "Select raid template to fill in the group requirements.",
+                values = {
+                    ["None"] = "None",
+                    ["Icecrown Citadel"] = "Icecrown Citadel",
+                },
+                width = "full",
+                set = function(info, value)
+                    core.db.profile.selectedRaid = value;
+                    if GB.raidTemplates[value] then
+                        GB.raidTemplates[value]();
+                    end
+                end,
+                get = function(info)
+                    return core.db.profile.selectedRaid;
+                end,
+            },
+            groupRequirements = {
+                order = 4,
                 type = "group",
                 inline = true,
                 name = "Group Requirements",
@@ -184,7 +225,7 @@ function Config:CreateMinimapIcon()
             tt:AddLine("|cffCCCCCCClick|r to open options");
             tt:AddLine("|cffCCCCCCDrag|r to move this button");
         end,
-        text = GB.addonName,
+        text = core.addonName,
         iconCoords = {0.05, 0.85, 0.15, 0.95},
     });
 

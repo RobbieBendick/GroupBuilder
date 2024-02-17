@@ -1,12 +1,16 @@
 local _, core = ...;
+core.GB = {};
+GB = core.GB;
 core.addonName = "GroupBuilder";
 core.raidTable = {};
 core.invitedTable = {};
 
+
 core.eventHandlerTable = {
 	["PLAYER_LOGIN"] = function(self) core.Config:OnInitialize(self) end,
     ["CHAT_MSG_WHISPER"] = function(self, ...) core.GB.HandleWhispers(self, ...) end,
-    ["GROUP_ROSTER_UPDATE"] = function (self, ...) core.GB.HandleGroupRosterUpdate(self, ...) end
+    ["GROUP_ROSTER_UPDATE"] = function (self, ...) core.GB.HandleGroupRosterUpdate(self, ...) end,
+    ["CHAT_MSG_SYSTEM"] = function(self, ...) core.GB.HandleErrorMessages(self, ...) end
 };
 
 core.roles = {
