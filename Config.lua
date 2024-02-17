@@ -240,7 +240,10 @@ function Advertise()
         SendChatMessage(core.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
     else
         ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, "LookingForGroup");
-        print("Advertisement failed because you're not in the LookingForGroup channel. Joining now... Please advertise again when you're ready.")
+        print("Advertisement failed because you're not in the LookingForGroup channel. Joining now...");
+        C_Timer.After(8, function ()
+            StaticPopup_Show("NOT_IN_LFG");
+        end);
     end
 end
 
@@ -276,7 +279,19 @@ end
 function Config:OnInitialize()
     -- initialize saved variables with defaults
     core.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
-
+    StaticPopupDialogs["NOT_IN_LFG"] = {
+        text = "You weren't previously in the LFG channel. Resend your advertisement?",
+        button1 = "Send Advertisement",
+        button2 = "Cancel",
+        timeout = 120,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = STATICPOPUP_NUMDIALOGS,
+        OnAccept = Advertise,
+        OnCancel = function ()
+            StaticPopup_Hide("NOT_IN_LFG");
+        end
+    };
     Config:CreateMinimapIcon();
     Config:CreateMenu();
 end

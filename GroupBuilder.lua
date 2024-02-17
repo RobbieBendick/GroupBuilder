@@ -134,6 +134,11 @@ function GB:HandleErrorMessages(msg)
 end
 
 function GB:HandleGroupRosterUpdate(self, ...)
+    local playerName = UnitName("player");
+    if core.db.profile.selectedRole and not core.raidTable[playerName] then
+        core.raidTable[playerName] = core.db.profile.selectedRole;
+    end
+
     for i = 1, GetNumGroupMembers() do
         local name = GetRaidRosterInfo(i);
         if GB:IsInInvitedTable(name) and not GB:IsInRaidTable(name) then
