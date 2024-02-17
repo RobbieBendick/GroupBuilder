@@ -61,7 +61,7 @@ core.roles = {
         "warlock",
         "lock",
         "spriest",
-        "shadow"
+        "shadow",
         "boom",
         "moon",
         "balance",

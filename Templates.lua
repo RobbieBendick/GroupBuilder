@@ -25,7 +25,7 @@ function GB:CheckForPlayerRole()
     end
 end
 
-function GB:IcecrownCitadelTemplate()
+function GB:IcecrownCitadel25Template()
     core.db.profile.maxDPS = 17;
     core.db.profile.maxTanks = 2;
     core.db.profile.maxHealers = 6;
@@ -35,7 +35,18 @@ function GB:IcecrownCitadelTemplate()
     GB:CheckForPlayerRole();
 end
 
+function GB:IcecrownCitadel10Template()
+    core.db.profile.maxDPS = 5;
+    core.db.profile.maxTanks = 2;
+    core.db.profile.maxHealers = 3;
+    core.db.profile.maxRangedDPS = 4;
+    core.db.profile.maxMeleeDPS = 4;
+    core.db.profile.minGearscore = 5400;
+    GB:CheckForPlayerRole();
+end
+
 GB.raidTemplates = {
     ["None"] = GB.NoneTemplate,
-    ["Icecrown Citadel"] = GB.IcecrownCitadelTemplate,
+    ["Icecrown Citadel 25"] = GB.IcecrownCitadel25Template,
+    ["Icecrown Citadel 10"] = GB.IcecrownCitadel10Template,
 }

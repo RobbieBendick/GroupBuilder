@@ -81,7 +81,9 @@ function Config:CreateMenu()
                 desc = "Select raid template to fill in the group requirements.",
                 values = {
                     ["None"] = "None",
-                    ["Icecrown Citadel"] = "Icecrown Citadel",
+                    ["Icecrown Citadel 25"] = "Icecrown Citadel 25",
+                    ["Icecrown Citadel 10"] = "Icecrown Citadel 10",
+
                 },
                 width = "full",
                 set = function(info, value)
