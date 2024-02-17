@@ -22,7 +22,8 @@ core.roles = {
         "disc",
         "hpal",
         "holy pal",
-        "hpal"
+        "hpal",
+        "h pal",
     },
     ["tank"] = {
         "prot pal",
@@ -61,5 +62,8 @@ core.roles = {
         "lock",
         "spriest",
         "shadow"
+        "boom",
+        "moon",
+        "balance",
     },
 };
