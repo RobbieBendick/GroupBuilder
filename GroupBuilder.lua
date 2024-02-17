@@ -78,10 +78,18 @@ function GB:FindGearscore(message)
     return gearscoreNumber;
 end
 
+function GB:IsInRaidTable(name)
+    return core.raidTable[name] ~= nil;
+end
+
+function GB:IsInInvitedTable(name)
+    return core.invitedTable[name] ~= nil;
+end
 
 
 function GB:HandleWhispers(message, sender, ...)
     if core.db.profile.isPaused then return end
+
     local gearscoreNumber = GB:FindGearscore(message);
     if not gearscoreNumber then return end
 
@@ -96,7 +104,7 @@ function GB:HandleWhispers(message, sender, ...)
         ["tank"] = core.db.profile.maxTanks,
         ["healer"] = core.db.profile.maxHealers
     };
-    
+
     for role, max in pairs(maxRoleValues) do
         if role == "ranged_dps" or role == "melee_dps" then
             if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= max then return end
@@ -108,18 +116,17 @@ function GB:HandleWhispers(message, sender, ...)
     local senderCharacterName = sender:match("([^%-]+)");
 
     -- invite them
-    local maxTimeToInvite = 10;
-    C_Timer.After(math.random(4, maxTimeToInvite), function ()
+    local minTimeToInvite, maxTimeToInvite = 4, 10;
+    C_Timer.After(math.random(minTimeToInvite, maxTimeToInvite), function ()
         print('inviting ', senderCharacterName);
         InviteUnit(senderCharacterName);
         core.invitedTable[senderCharacterName] = role;
     end)
 
-    local inviteExpirationTime = 122;
     -- remove them from invited table if invite expires
+    local inviteExpirationTime = 122;
     C_Timer.After(inviteExpirationTime + maxTimeToInvite, function ()
-        -- if the player is not in raid but is in the invited table
-        if not core.raidTable[senderCharacterName] then 
+        if not GB:IsInRaidTable(senderCharacterName) and GB:IsInInvitedTable(senderCharacterName) then
             core.invitedTable[senderCharacterName] = nil;
         end
     end);
@@ -128,13 +135,15 @@ end
 function GB:HandleGroupRosterUpdate(self, ...)
     for i = 1, GetNumGroupMembers() do
         local name = GetRaidRosterInfo(i);
-        local playerRole = core.invitedTable[name];
-        if playerRole and not core.raidTable[name] then
+        if GB:IsInInvitedTable(name) and not GB:IsInRaidTable(name) then
             -- add to raid table
             core.raidTable[name] = core.invitedTable[name];
             
             -- remove from inv table
             core.invitedTable[name] = nil; 
+        elseif GB:IsInInvitedTable(name) and GB:IsInRaidTable(name) then
+            -- remove them from the invited table
+            core.invitedTable[name] = nil;
         end
     end
 end

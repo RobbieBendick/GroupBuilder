@@ -50,7 +50,7 @@ function Config:CreateMenu()
                     return core.db.profile.message;
                 end,
                 validate = function(info, value)
-                    return string.len(value) <= 255;
+                    return value:len() <= 255;
                 end,
             },
             group1 = {
@@ -199,7 +199,7 @@ function Config:CreateMinimapIcon()
             self:UnlockHighlight();
 
             local point, relativeFrame, relativePoint, x, y = self:GetPoint();
-            core.db.profile.minimapCoords = { unpack({point, relativeFrame:GetName(), relativePoint, x, y}) };
+            core.db.profile.minimapCoords = { point, relativeFrame:GetName(), relativePoint, x, y };
         end);
     end);
 end
