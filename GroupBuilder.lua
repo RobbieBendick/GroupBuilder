@@ -1,18 +1,17 @@
-local _, core = ...;
-local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon(core.addonName, "AceConsole-3.0", "AceEvent-3.0");
-local Config = core.Config;
+local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
+local Config = GroupBuilder.Config;
 
-function GB:CountPlayersByRole(table, role)
+function GroupBuilder:CountPlayersByRole(table, role)
     local count = 0;
     if role == "dps" then
-        for _, playerRole in pairs(core.raidTable) do
-            if playerRole == "melee_dps" or playerRole == "ranged_dps" then
+        for _, playerData in pairs(GroupBuilder.raidTable) do
+            if playerData.role == "melee_dps" or playerData.role == "ranged_dps" then
                 count = count + 1;
             end
         end
     else
-        for _, playerRole in pairs(core.raidTable) do
-            if playerRole == role then
+        for _, playerData in pairs(GroupBuilder.raidTable) do
+            if playerData.role == role then
                 count = count + 1;
             end
         end
@@ -20,10 +19,9 @@ function GB:CountPlayersByRole(table, role)
     return count;
 end
 
-
-function GB:FindRole(message)
+function GroupBuilder:FindRole(message)
     local foundRole;
-    for role, keyWords in pairs(core.roles) do
+    for role, keyWords in pairs(GroupBuilder.roles) do
         for _, keyWord in ipairs(keyWords) do
             if message:lower():find(keyWord) then
                 foundRole = role;
@@ -37,11 +35,11 @@ function GB:FindRole(message)
     return foundRole;
 end
 
-function GB:FindGearscore(message)
+function GroupBuilder:FindGearscore(message)
     local keywordPatternWithGS = "(%d+%.?%d*)([kK]?)%s*gs%s*";
     local keywordPatternWithGearscore = "(%d+%.?%d*)([kK]?)%s*gearscore%s*";
     local keywordPatternWithGearscoreSpace = "(%d+%.?%d*)([kK]?)%s*gear%s*score%s*";
-    local rolePattern = "(%d+%.?%d*)([kK]?)%s*(%a+)";
+    local keywordPatternWithGearscoreRole = "(%d+%.?%d*)([kK]?)%s*(%a+)";
     local gearscoreNumber;
 
     function checkMessageForPattern(pattern)
@@ -63,7 +61,7 @@ function GB:FindGearscore(message)
     if gearscoreNumber then return gearscoreNumber end
 
     -- check for pattern with number followed by a role
-    for number, k, role in message:lower():gmatch(rolePattern) do
+    for number, k, role in message:lower():gmatch(keywordPatternWithGearscoreRole) do
         gearscoreNumber = tonumber(number);
 
         if k:lower() == "k" then
@@ -74,104 +72,107 @@ function GB:FindGearscore(message)
     return gearscoreNumber;
 end
 
-function GB:IsInRaidTable(name)
-    return core.raidTable[name] ~= nil;
+function GroupBuilder:IsInRaidTable(name)
+    return GroupBuilder.raidTable[name] ~= nil;
 end
 
-function GB:IsInInvitedTable(name)
-    return core.invitedTable[name] ~= nil;
+function GroupBuilder:IsInInvitedTable(name)
+    return GroupBuilder.invitedTable[name] ~= nil;
 end
 
-function GB:HandleWhispers(message, sender, ...)
-    if core.db.profile.isPaused then return end
+function GroupBuilder:HandleWhispers(event, message, sender, ...)
+    if GroupBuilder.db.profile.isPaused then return end
 
-    local gearscoreNumber = GB:FindGearscore(message);
+    local gearscoreNumber = GroupBuilder:FindGearscore(message);
     if not gearscoreNumber then return end
 
-    local role = GB:FindRole(message);
+    local role = GroupBuilder:FindRole(message);
     if not role then return end
-
-    if gearscoreNumber < tonumber(core.db.profile.minGearscore) then return end
+    if gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then return end
     
     local maxRoleValues = {
-        ["ranged_dps"] = core.db.profile.maxRangedDPS,
-        ["melee_dps"] = core.db.profile.maxMeleeDPS,
-        ["tank"] = core.db.profile.maxTanks,
-        ["healer"] = core.db.profile.maxHealers
+        ["ranged_dps"] = GroupBuilder.db.profile.maxRangedDPS,
+        ["melee_dps"] = GroupBuilder.db.profile.maxMeleeDPS,
+        ["tank"] = GroupBuilder.db.profile.maxTanks,
+        ["healer"] = GroupBuilder.db.profile.maxHealers
     };
 
     for role, max in pairs(maxRoleValues) do
         if role == "ranged_dps" or role == "melee_dps" then
-            if GB:CountPlayersByRole("dps") >= core.db.profile.maxDPS or GB:CountPlayersByRole(role) >= max then return end
+            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(role) >= max then return end
         else
-            if GB:CountPlayersByRole(role) >= max then return end
+            if GroupBuilder:CountPlayersByRole(role) >= max then return end
         end
     end
 
-    local senderCharacterName = sender:match("([^%-]+)");
+    local whispererCharacterName = sender:match("([^%-]+)");
 
     -- invite them
     local minTimeToInvite, maxTimeToInvite = 4, 10;
     C_Timer.After(math.random(minTimeToInvite, maxTimeToInvite), function ()
-        print('inviting ', senderCharacterName);
-        InviteUnit(senderCharacterName);
-        core.invitedTable[senderCharacterName] = role;
+        print('inviting ', whispererCharacterName);
+        InviteUnit(whispererCharacterName);
+
+        local _, whispererClass = UnitClass(whispererCharacterName);
+
+        GroupBuilder.invitedTable[whispererCharacterName] = {
+            ["class"] = whispererClass,
+            ["role"] = role,
+        };
     end)
 
     -- remove them from invited table if invite expires
     local inviteExpirationTime = 122;
     C_Timer.After(inviteExpirationTime + maxTimeToInvite, function ()
-        if not GB:IsInRaidTable(senderCharacterName) and GB:IsInInvitedTable(senderCharacterName) then
-            core.invitedTable[senderCharacterName] = nil;
+        if not GroupBuilder:IsInRaidTable(whispererCharacterName) and GroupBuilder:IsInInvitedTable(whispererCharacterName) then
+            GroupBuilder.invitedTable[whispererCharacterName] = nil;
         end
     end);
 end
 
-function GB:HandleErrorMessages(msg)
+function GroupBuilder:HandleErrorMessages(event, msg)
     if not msg:find("is already in a group") then return end
     local playerName = msg:match("(%S+)");
-    core.invitedTable[playerName] = nil;
+    GroupBuilder.invitedTable[playerName] = nil;
 end
 
-function GB:HandleGroupRosterUpdate(self, ...)
+function GroupBuilder:AddPlayerToRaidTable(name, role)
+    local _, class = UnitClass(name);
+    GroupBuilder.raidTable[name] = {
+        ["class"] = class,
+        ["role"] = role,
+    };
+end
+
+function GroupBuilder:FindClassCount(class)
+    if not class then return end
+    local count = 0;
+    for characterName, characterData in pairs(GroupBuilder.raidTable) do
+        if characterData.class == class then
+            count = count + 1;
+        end
+    end
+    return count;
+end
+
+function GroupBuilder:RemovePlayerFromRaidTable(name)
+    GroupBuilder.raidTable[name] = nil;
+end
+
+function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
     local playerName = UnitName("player");
-    if core.db.profile.selectedRole and not core.raidTable[playerName] then
-        core.raidTable[playerName] = core.db.profile.selectedRole;
+    if GroupBuilder.db.profile.selectedRole and not GroupBuilder:IsInRaidTable(playerName) then
+        GroupBuilder:AddPlayerToRaidTable(playerName, GroupBuilder.db.profile.selectedRole);
     end
 
     for i = 1, GetNumGroupMembers() do
         local name = GetRaidRosterInfo(i);
-        if GB:IsInInvitedTable(name) and not GB:IsInRaidTable(name) then
-            -- add to raid table
-            core.raidTable[name] = core.invitedTable[name];
-            
-            -- remove from inv table
-            core.invitedTable[name] = nil; 
-        elseif GB:IsInInvitedTable(name) and GB:IsInRaidTable(name) then
-            -- remove them from the invited table
-            core.invitedTable[name] = nil;
+        if GroupBuilder:IsInInvitedTable(name) and not GroupBuilder:IsInRaidTable(name) then
+            local role = GroupBuilder.invitedTable[name].role;
+            GroupBuilder:AddPlayerToRaidTable(name, role);            
+            GroupBuilder:RemovePlayerFromRaidTable(name);
+        elseif GroupBuilder:IsInInvitedTable(name) and GroupBuilder:IsInRaidTable(name) then
+            GroupBuilder.invitedTable[name] = nil;
         end
     end
 end
-
-
-local addonLoadedFrame = CreateFrame("Frame");
-addonLoadedFrame:RegisterEvent("ADDON_LOADED");
-local eventFrame = CreateFrame("Frame");
-
-function GB:AddonLoaded(self, addonName)
-    -- register all relevant events
-    if addonName == core.addonName then
-        for event, func in pairs(core.eventHandlerTable) do
-            eventFrame:RegisterEvent(event);
-        end
-    end
-end
-
--- event handler
-function GB:EventHandler(event, ...)
-    return core.eventHandlerTable[event](self, ...);
-end
-
-addonLoadedFrame:SetScript("OnEvent", GB.AddonLoaded);
-eventFrame:SetScript("OnEvent", GB.EventHandler);

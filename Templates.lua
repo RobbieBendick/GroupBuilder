@@ -1,52 +1,52 @@
-local _, core = ...;
+local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 
-function GB:NoneTemplate()
-    core.db.profile.maxDPS = 0;
-    core.db.profile.maxTanks = 0;
-    core.db.profile.maxHealers = 0;
-    core.db.profile.maxRangedDPS = 0;
-    core.db.profile.maxMeleeDPS = 0;
-    core.db.profile.minGearscore = 0;
+function GroupBuilder:NoneTemplate()
+    GroupBuilder.db.profile.maxDPS = 0;
+    GroupBuilder.db.profile.maxTanks = 0;
+    GroupBuilder.db.profile.maxHealers = 0;
+    GroupBuilder.db.profile.maxRangedDPS = 0;
+    GroupBuilder.db.profile.maxMeleeDPS = 0;
+    GroupBuilder.db.profile.minGearscore = 0;
 end
 
-function GB:CheckForPlayerRole()
-    local selectedRole = core.db.profile.selectedRole;
+function GroupBuilder:CheckForPlayerRole()
+    local selectedRole = GroupBuilder.db.profile.selectedRole;
     if not selectedRole then return end
     if selectedRole == "ranged_dps" then
-        core.db.profile.maxDPS = core.db.profile.maxDPS - 1;
-        core.db.profile.maxRangedDPS = core.db.profile.maxRangedDPS - 1;
+        GroupBuilder.db.profile.maxDPS = GroupBuilder.db.profile.maxDPS - 1;
+        GroupBuilder.db.profile.maxRangedDPS = GroupBuilder.db.profile.maxRangedDPS - 1;
     elseif selectedRole == "melee_dps" then
-        core.db.profile.maxDPS = core.db.profile.maxDPS - 1;
-        core.db.profile.maxMeleeDPS = core.db.profile.maxMeleeDPS - 1;
+        GroupBuilder.db.profile.maxDPS = GroupBuilder.db.profile.maxDPS - 1;
+        GroupBuilder.db.profile.maxMeleeDPS = GroupBuilder.db.profile.maxMeleeDPS - 1;
     elseif selectedRole == "tank" then
-        core.db.profile.maxTanks = core.db.profile.maxTanks - 1;
+        GroupBuilder.db.profile.maxTanks = GroupBuilder.db.profile.maxTanks - 1;
     elseif selectedRole == "healer" then
-        core.db.profile.maxHealers = core.db.profile.maxHealers - 1;
+        GroupBuilder.db.profile.maxHealers = GroupBuilder.db.profile.maxHealers - 1;
     end
 end
 
-function GB:IcecrownCitadel25Template()
-    core.db.profile.maxDPS = 17;
-    core.db.profile.maxTanks = 2;
-    core.db.profile.maxHealers = 6;
-    core.db.profile.maxRangedDPS = 10;
-    core.db.profile.maxMeleeDPS = 10;
-    core.db.profile.minGearscore = 5600;
-    GB:CheckForPlayerRole();
+function GroupBuilder:IcecrownCitadel25Template()
+    GroupBuilder.db.profile.maxDPS = 17;
+    GroupBuilder.db.profile.maxTanks = 2;
+    GroupBuilder.db.profile.maxHealers = 6;
+    GroupBuilder.db.profile.maxRangedDPS = 10;
+    GroupBuilder.db.profile.maxMeleeDPS = 10;
+    GroupBuilder.db.profile.minGearscore = 5600;
+    GroupBuilder:CheckForPlayerRole();
 end
 
-function GB:IcecrownCitadel10Template()
-    core.db.profile.maxDPS = 5;
-    core.db.profile.maxTanks = 2;
-    core.db.profile.maxHealers = 3;
-    core.db.profile.maxRangedDPS = 4;
-    core.db.profile.maxMeleeDPS = 4;
-    core.db.profile.minGearscore = 5400;
-    GB:CheckForPlayerRole();
+function GroupBuilder:IcecrownCitadel10Template()
+    GroupBuilder.db.profile.maxDPS = 5;
+    GroupBuilder.db.profile.maxTanks = 2;
+    GroupBuilder.db.profile.maxHealers = 3;
+    GroupBuilder.db.profile.maxRangedDPS = 4;
+    GroupBuilder.db.profile.maxMeleeDPS = 4;
+    GroupBuilder.db.profile.minGearscore = 5400;
+    GroupBuilder:CheckForPlayerRole();
 end
 
-GB.raidTemplates = {
-    ["None"] = GB.NoneTemplate,
-    ["Icecrown Citadel 25"] = GB.IcecrownCitadel25Template,
-    ["Icecrown Citadel 10"] = GB.IcecrownCitadel10Template,
+GroupBuilder.raidTemplates = {
+    ["None"] = GroupBuilder.NoneTemplate,
+    ["Icecrown Citadel 25"] = GroupBuilder.IcecrownCitadel25Template,
+    ["Icecrown Citadel 10"] = GroupBuilder.IcecrownCitadel10Template,
 }

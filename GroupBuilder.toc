@@ -10,4 +10,5 @@ Constants.lua
 Templates.lua
 
 Config.lua
+Events.lua
 GroupBuilder.lua

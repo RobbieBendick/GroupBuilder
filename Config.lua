@@ -1,9 +1,8 @@
-local _, core = ...;
+local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local LibDBIcon = LibStub("LibDBIcon-1.0");
-core.Config = {};
-local Config = core.Config;
+GroupBuilder.Config = {};
+local Config = GroupBuilder.Config;
 local GBConfig;
-local GB = core.GB;
 local defaults = {
     profile = {
         maxHealers = 0,
@@ -15,13 +14,43 @@ local defaults = {
         message = "",
         minimapCoords = {},
         isPaused = true,
-        selectedRaid = "",
+        selectedRaidTemplate = "",
         selectedRole = "",
+        selectedRaidType = "",
+        selectedSRRaidInfo = "",
+        selectedGDKPRaidInfo = "",
+        selectedAdvertisementRaid = "",
+        minPlayersForAdvertisingCount = 15,
+        constructMessageIsActive = false,
+        outOfMaxPlayers = 0,
     }
 }
+
+local raidInstanceDropdownValues = {
+    ["None"] = "None",
+    ["Icecrown Citadel 25"] = "Icecrown Citadel 25",
+    ["Icecrown Citadel 10"] = "Icecrown Citadel 10",
+}
+
+local raidInstanceDropdownAcronyms = {
+    ["ICC 25"] = "Icecrown Citadel 25",
+    ["ICC 10"] = "Icecrown Citadel 10",
+    ["RS 25"] = "Ruby Sanctum 25",
+    ["RS 10"] = "Ruby Sanctum 10",
+}
+
 function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
+end
+
+function Config:GetKeyByValue(tbl, value)
+    for k, v in pairs(tbl) do
+        if v == value then
+            return k;
+        end
+    end
+    return nil;
 end
 
 function Config:CreateMenu()
@@ -45,59 +74,226 @@ function Config:CreateMenu()
                 type = "input",
                 width = "full",
                 set = function(info, value) 
-                    core.db.profile.message = value;
+                    GroupBuilder.db.profile.message = value;
                 end,
                 get = function(info) 
-                    return core.db.profile.message;
+                    return GroupBuilder.db.profile.message;
                 end,
                 validate = function(info, value)
                     return #value <= 255;
                 end,
+                disabled = function (info)
+                    return GroupBuilder.db.profile.constructMessageIsActive;
+                end
             },
-            roleDropdown = {
+            roleAndRaidGroup = {
                 order = 2,
-                type = "select",
-                name = "Select Your Role",
-                desc = "Select your role.",
-                values = {
-                    ["ranged_dps"] = "Ranged DPS",
-                    ["melee_dps"] = "Melee DPS",
-                    ["tank"] = "Tank",
-                    ["healer"] = "Healer",
+                type = "group",
+                inline = true,
+                name = "Role and Raid Template",
+                args = {
+                    roleDropdown = {
+                        order = 1,
+                        type = "select",
+                        name = "Select Your Role",
+                        desc = "Select your role.",
+                        values = {
+                            ["ranged_dps"] = "Ranged DPS",
+                            ["melee_dps"] = "Melee DPS",
+                            ["tank"] = "Tank",
+                            ["healer"] = "Healer",
+                        },
+                        width = "normal",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.selectedRole = value;
+                            GroupBuilder.raidTemplates[GroupBuilder.db.profile.selectedRaidTemplate]();
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.selectedRole;
+                        end,
+                    },
+                    raidDropdown = {
+                        order = 2,
+                        type = "select",
+                        name = "Select Raid Template",
+                        desc = "Select raid template to fill in the group requirements.",
+                        values = raidInstanceDropdownValues,
+                        width = "normal",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.selectedRaidTemplate = value;
+                            if GroupBuilder.raidTemplates[value] then
+                                GroupBuilder.raidTemplates[value]();
+                            end
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.selectedRaidTemplate;
+                        end,
+                    },
                 },
-                width = "full",
-                set = function(info, value)
-                    core.db.profile.selectedRole = value;
-                    GB.raidTemplates[core.db.profile.selectedRaid]();
-                end,
-                get = function(info)
-                    return core.db.profile.selectedRole;
-                end,
             },
-            raidDropdown = {
+            advertisingOptions = {
                 order = 3,
-                type = "select",
-                name = "Select Raid Template",
-                desc = "Select raid template to fill in the group requirements.",
-                values = {
-                    ["None"] = "None",
-                    ["Icecrown Citadel 25"] = "Icecrown Citadel 25",
-                    ["Icecrown Citadel 10"] = "Icecrown Citadel 10",
-
+                type = "group",
+                inline = false,
+                name = "Advertising Message",
+                args = {
+                    enableConstructAdvertisementMessage = {
+                        order = 1,
+                        type = "toggle",
+                        name = "Construct An Advertising Message",
+                        desc = "Enable or disable current settings to construct an advertising message",
+                        width = "full",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.constructMessageIsActive = not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                    },
+                    raidTypeGroup = {
+                        order = 2,
+                        type = "group",
+                        inline = true,
+                        name = "Raid Options",
+                        args = {
+                            raidDropdown = {
+                                order = 1,
+                                type = "select",
+                                name = "Raid Instance",
+                                desc = "Select the raid instance you want to advertise for.",
+                                values = raidInstanceDropdownAcronyms,
+                                width = "normal",
+                                set = function (info, value)
+                                    GroupBuilder.db.profile.selectedAdvertisementRaid = value;
+                                end,
+                                get = function (info)
+                                    return GroupBuilder.db.profile.selectedAdvertisementRaid;
+                                end,
+                                disabled = function(info)
+                                    return not GroupBuilder.db.profile.constructMessageIsActive;
+                                end,
+                            },
+                            raidTypeDropdown = {
+                                order = 2,
+                                type = "select",
+                                name = "Raid Type",
+                                desc = "Select the raid type.",
+                                values = {
+                                    ["SR"] = "SR",
+                                    ["SR (MS/OS)"] = "SR (MS/OS)",
+                                    ["MS/OS"] = "MS/OS",
+                                    ["GDKP"] = "GDKP",
+                                },
+                                width = "normal",
+                                set = function(info, value)
+                                    GroupBuilder.db.profile.selectedRaidType = value;
+                                end,
+                                get = function(info)
+                                    return GroupBuilder.db.profile.selectedRaidType;
+                                end,
+                                disabled = function(info)
+                                    return not GroupBuilder.db.profile.constructMessageIsActive;
+                                end,
+                            },
+                            secondaryRaidTypeDropdownSR = {
+                                order = 3,
+                                type = "select",
+                                name = "More Raid Info",
+                                desc = "More raid info.",
+                                values = {
+                                    ["2x"] = "2x",
+                                    ["3x"] = "3x",
+                                    ["4x"] = "4x",
+                                },
+                                width = "normal",
+                                set = function(info, value)
+                                    GroupBuilder.db.profile.selectedSRRaidInfo = value;
+                                end,
+                                get = function(info)
+                                    return GroupBuilder.db.profile.selectedSRRaidInfo;
+                                end,
+                                disabled = function(info)
+                                    return not GroupBuilder.db.profile.constructMessageIsActive;
+                                end,
+                                hidden = function(info)
+                                    return GroupBuilder.db.profile.selectedRaidType ~= "SR" and GroupBuilder.db.profile.selectedRaidType ~= "SR (MS/OS)";
+                                end
+                            },
+                            secondaryRaidTypeDropdownGDKP = {
+                                order = 3,
+                                type = "select",
+                                name = "More Raid Info",
+                                desc = "More raid info.",
+                                values = {
+                                    ["2kg/6kg"] = "2kg/6kg",
+                                    ["3kg/7kg"] = "3kg/7kg",
+                                    ["4kg/8kg"] = "4kg/8kg",
+                                },
+                                width = "normal",
+                                set = function(info, value)
+                                    GroupBuilder.db.profile.selectedGDKPRaidInfo = value;
+                                end,
+                                get = function(info)
+                                    return GroupBuilder.db.profile.selectedGDKPRaidInfo;
+                                end,
+                                disabled = function(info)
+                                    return not GroupBuilder.db.profile.constructMessageIsActive;
+                                end,
+                                hidden = function(info)
+                                    return GroupBuilder.db.profile.selectedRaidType ~= "GDKP";
+                                end
+                            },
+                        }
+                    },
+                    advertisingGroupSize = {
+                        order = 3,
+                        type = "group",
+                        inline = true,
+                        name = "Add Group Size To Message",
+                        args = {
+                            advertisingMinGroupSize = {
+                                order = 1,
+                                type = "input",
+                                name = "At Least",
+                                desc = "Number of players required in the group before adding the group size to the advertisement message. (0 or empty to disable)",
+                                width = "normal",
+                                disabled = function(info)
+                                    return not GroupBuilder.db.profile.constructMessageIsActive;
+                                end,
+                                set = function(info, value)
+                                    GroupBuilder.db.profile.minPlayersForAdvertisingCount = tonumber(value) or 26;
+                                end,
+                                get = function(info)
+                                    return tostring(GroupBuilder.db.profile.minPlayersForAdvertisingCount or "");
+                                end,
+                            },
+                            advertisingGroupSizeMax = {
+                                order = 2,
+                                type = "select",
+                                values = {
+                                    ["10"] = 10,
+                                    ["25"] = 25
+                                },
+                                name = "Out Of",
+                                desc = "Total number of players expected in your raid (10/25)",
+                                width = "normal",
+                                disabled = function(info)
+                                    return not GroupBuilder.db.profile.constructMessageIsActive;
+                                end,
+                                set = function(info, value)
+                                    GroupBuilder.db.profile.outOfMaxPlayers = tonumber(value) or 0;
+                                end,
+                                get = function(info)
+                                    return tostring(GroupBuilder.db.profile.outOfMaxPlayers or "");
+                                end,
+                            },
+                        },
+                    },
+                    
                 },
-                width = "full",
-                set = function(info, value)
-                    core.db.profile.selectedRaid = value;
-                    if GB.raidTemplates[value] then
-                        GB.raidTemplates[value]();
-                    end
-                end,
-                get = function(info)
-                    return core.db.profile.selectedRaid;
-                end,
             },
             groupRequirements = {
-                order = 4,
+                order = 5,
                 type = "group",
                 inline = true,
                 name = "Group Requirements",
@@ -109,10 +305,10 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.maxTanks = tonumber(value);
+                            GroupBuilder.db.profile.maxTanks = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.maxTanks);
+                            return tostring(GroupBuilder.db.profile.maxTanks);
                         end
                     }, 
                     maxHealers = {
@@ -122,10 +318,10 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.maxHealers = tonumber(value);
+                            GroupBuilder.db.profile.maxHealers = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.maxHealers);
+                            return tostring(GroupBuilder.db.profile.maxHealers);
                         end
                     },
                     maxDPS = {
@@ -135,10 +331,10 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.maxDPS = tonumber(value);
+                            GroupBuilder.db.profile.maxDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.maxDPS);
+                            return tostring(GroupBuilder.db.profile.maxDPS);
                         end
                     },
                     maxRangedDPS = {
@@ -148,10 +344,10 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.maxRangedDPS = tonumber(value);
+                            GroupBuilder.db.profile.maxRangedDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.maxRangedDPS);
+                            return tostring(GroupBuilder.db.profile.maxRangedDPS);
                         end
                     },
                     maxMeleeDPS = {
@@ -161,10 +357,10 @@ function Config:CreateMenu()
                         type = "input",
                         width = "half",
                         set = function(info, value) 
-                            core.db.profile.maxMeleeDPS = tonumber(value);
+                            GroupBuilder.db.profile.maxMeleeDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.maxMeleeDPS);
+                            return tostring(GroupBuilder.db.profile.maxMeleeDPS);
                         end
                     },
                     gearscore = {
@@ -172,35 +368,35 @@ function Config:CreateMenu()
                         name = "Minimum Gearscore",
                         desc = "Minimum gearscore required to join the group.",
                         type = "input",
-                        width = "half",
+                        width = "normal",
                         set = function(info, value) 
-                            core.db.profile.minGearscore = tonumber(value);
+                            GroupBuilder.db.profile.minGearscore = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(core.db.profile.minGearscore);
+                            return tostring(GroupBuilder.db.profile.minGearscore);
                         end
                     }
-                }
+                },
             },
-            sendButton = {
+            activateButton = {
                 order = 7,
                 type = "execute",
                 name = function ()
-                    if core.db.profile.isPaused then
+                    if GroupBuilder.db.profile.isPaused then
                         return "Activate Auto Inviting";
                     else
                         return "Pause Auto inviting";
                     end
                 end,
                 desc = function ()
-                    if core.db.profile.isPaused then
+                    if GroupBuilder.db.profile.isPaused then
                         return "Activate auto inviting";
                     else
                         return "Pause auto inviting";
                     end
                 end,
                 func = function()
-                   core.db.profile.isPaused = not core.db.profile.isPaused; 
+                   GroupBuilder.db.profile.isPaused = not GroupBuilder.db.profile.isPaused; 
                 end,
                 width = "full",
             },
@@ -208,9 +404,27 @@ function Config:CreateMenu()
     }
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("GroupBuilder", options);
-    self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
+    local success, errorMessage = pcall(function()
+        self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
+    end)
+    
+    if not success then
+        print("Error setting up menu:", errorMessage)
+    end
 
     GBConfig:Hide();
+end
+
+function Config:IsInTrade()
+    for i = 1, GetNumDisplayChannels() do
+        local id, channelName = GetChannelName(i)
+        if channelName then
+            if channelName:find("Trade") then
+                return true;
+            end
+        end
+    end
+    return false;
 end
 
 function Config:IsInLookingForGroup()
@@ -233,54 +447,117 @@ function Config:FindLFGChannelIndex()
     return nil;
 end
 
-function Advertise()
-    if not core.db.profile.message then 
+function Config:FindTradeChannelIndex()
+    for i = 1, GetNumDisplayChannels() do
+        local id, channelName = GetChannelName(i);
+        if channelName then
+            if channelName:find("Trade") then
+                return id;
+            end
+        end
+    end
+    return nil;
+end
+
+function Config:CreateAdvertisementMessage()
+    if not GroupBuilder.db.profile.constructMessageIsActive then return end
+    if not GroupBuilder.db.profile.selectedAdvertisementRaid then return end
+    if not GroupBuilder.db.profile.selectedRaidType then return end
+    if not GroupBuilder.db.profile.selectedGDKPRaidInfo or not GroupBuilder.db.profile.selectedSRRaidInfo then return end
+    local raidName = GroupBuilder.db.profile.selectedAdvertisementRaid;
+    local messageToSend = "LFM " .. raidName;
+
+    -- (10/25)
+    if GroupBuilder.db.profile.minPlayersForAdvertisingCount and GetNumGroupMembers() >= GroupBuilder.db.profile.minPlayersForAdvertisingCount then
+        messageToSend = messageToSend .. " (" .. GetNumGroupMembers() .. "/" .. GroupBuilder.db.profile.outOfMaxPlayers .. ")";
+    end
+
+    -- ICC 10
+    if GroupBuilder.db.profile.selectedRaidType then
+        messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedRaidType;
+    end
+
+    -- GDKP or SR etc
+    if GroupBuilder.db.profile.selectedRaidType == "GDKP" then
+        messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedGDKPRaidInfo;
+    elseif GroupBuilder.db.profile.selectedRaidType == "SR" or GroupBuilder.db.profile.selectedRaidType == "SR (MS/OS)" then
+        messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedSRRaidInfo;
+    end
+
+    -- TODO: if there are atleast 15 players, find missing roles and place in the message.
+
+
+    SendChatMessage(messageToSend, "WHISPER", nil, "Floydsr");
+end
+
+function AdvertiseLFG()
+    if GroupBuilder.db.profile.constructMessageIsActive then
+        return Config:CreateAdvertisementMessage();
+    end
+    if not GroupBuilder.db.profile.message then 
         return print("Please enter an advertisement message.");
     end
     if Config:IsInLookingForGroup() then
         local lookingForGroupChannelID = Config:FindLFGChannelIndex();
-        SendChatMessage(core.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
+        SendChatMessage(GroupBuilder.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
     else
         ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, "LookingForGroup");
-        print("Advertisement failed because you're not in the LookingForGroup channel. Joining now...");
-        C_Timer.After(8, function ()
+        print("Advertisement failed because you're not in the LookingForGroup channel.");
+        print("Trying to join LookingForGroup...");
+        print("Please type /join LookingForGroup and resend the advertisement.");
+        C_Timer.After(7, function ()
             StaticPopup_Show("NOT_IN_LFG");
         end);
     end
 end
 
+function AdvertiseTrade()
+    if not GroupBuilder.db.profile.message then 
+        return print("Please enter an advertisement message.");
+    end
+
+    if Config:IsInTrade() then
+        local tradeChannelID = Config:FindTradeChannelIndex();
+        SendChatMessage(GroupBuilder.db.profile.message, "CHANNEL", nil, tradeChannelID);
+    else
+        print("Advertisement failed because you're not in the Trade channel.");
+        print("Please type /join trade and resend the advertisement.");
+        C_Timer.After(7, function ()
+            StaticPopup_Show("NOT_IN_TRADE");
+        end);
+    end
+end
+
 function Config:CreateMinimapIcon()
-    LibDBIcon:Register(core.addonName, {
+    LibDBIcon:Register(GroupBuilder.addonName, {
         icon = "Interface\\GROUPFRAME\\UI-Group-LeaderIcon",
         OnClick = self.Toggle,
         OnTooltipShow = function(tt)
-            tt:AddLine(core.addonName .. " |cff808080" .. GetAddOnMetadata(core.addonName, "Version"));
+            tt:AddLine(GroupBuilder.addonName .. " |cff808080" .. GetAddOnMetadata(GroupBuilder.addonName, "Version"));
             tt:AddLine("|cffCCCCCCClick|r to open options");
             tt:AddLine("|cffCCCCCCDrag|r to move this button");
         end,
-        text = core.addonName,
+        text = GroupBuilder.addonName,
         iconCoords = {0.05, 0.85, 0.15, 0.95},
     });
 
     C_Timer.After(0.25, function ()
-        if #core.db.profile.minimapCoords > 0 then
-            LibDBIcon:GetMinimapButton(core.addonName):SetPoint(unpack(core.db.profile.minimapCoords));
+        if #GroupBuilder.db.profile.minimapCoords > 0 then
+            LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetPoint(unpack(GroupBuilder.db.profile.minimapCoords));
         end
-        LibDBIcon:GetMinimapButton(core.addonName):SetScript("OnDragStop", function (self)
+        LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetScript("OnDragStop", function (self)
             self:SetScript("OnUpdate", nil);
             self.isMouseDown = false;
             self.icon:UpdateCoord();
             self:UnlockHighlight();
 
             local point, relativeFrame, relativePoint, x, y = self:GetPoint();
-            core.db.profile.minimapCoords = { point, relativeFrame:GetName(), relativePoint, x, y };
+            GroupBuilder.db.profile.minimapCoords = { point, relativeFrame:GetName(), relativePoint, x, y };
         end);
     end);
 end
 
-function Config:OnInitialize()
-    -- initialize saved variables with defaults
-    core.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
+function Config:LoadStaticPopups()
     StaticPopupDialogs["NOT_IN_LFG"] = {
         text = "You weren't previously in the LFG channel. Resend your advertisement?",
         button1 = "Send Advertisement",
@@ -289,11 +566,23 @@ function Config:OnInitialize()
         whileDead = true,
         hideOnEscape = true,
         preferredIndex = STATICPOPUP_NUMDIALOGS,
-        OnAccept = Advertise,
+        OnAccept = AdvertiseLFG,
         OnCancel = function ()
             StaticPopup_Hide("NOT_IN_LFG");
         end
     };
-    Config:CreateMinimapIcon();
-    Config:CreateMenu();
+    StaticPopupDialogs["NOT_IN_TRADE"] = {
+        text = "You're not in the Trade channel. Please type /join trade and send the advertisement again.",
+        button1 = "Send Advertisement",
+        button2 = "Cancel",
+        timeout = 120,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = STATICPOPUP_NUMDIALOGS,
+        OnAccept = AdvertiseTrade,
+        OnCancel = function ()
+            StaticPopup_Hide("NOT_IN_TRADE");
+        end
+    };
 end
+
