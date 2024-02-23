@@ -45,8 +45,31 @@ function GroupBuilder:IcecrownCitadel10Template()
     GroupBuilder:CheckForPlayerRole();
 end
 
+function GroupBuilder:RubySanctum10Template()
+    GroupBuilder.db.profile.maxDPS = 5;
+    GroupBuilder.db.profile.maxTanks = 2;
+    GroupBuilder.db.profile.maxHealers = 3;
+    GroupBuilder.db.profile.maxRangedDPS = 4;
+    GroupBuilder.db.profile.maxMeleeDPS = 4;
+    GroupBuilder.db.profile.minGearscore = 5400;
+    GroupBuilder:CheckForPlayerRole();
+end
+
+function GroupBuilder:RubySanctum25Template()
+    GroupBuilder.db.profile.maxDPS = 17;
+    GroupBuilder.db.profile.maxTanks = 2;
+    GroupBuilder.db.profile.maxHealers = 6;
+    GroupBuilder.db.profile.maxRangedDPS = 10;
+    GroupBuilder.db.profile.maxMeleeDPS = 10;
+    GroupBuilder.db.profile.minGearscore = 5600;
+    GroupBuilder:CheckForPlayerRole();
+end
+
+
 GroupBuilder.raidTemplates = {
     ["None"] = GroupBuilder.NoneTemplate,
     ["Icecrown Citadel 25"] = GroupBuilder.IcecrownCitadel25Template,
     ["Icecrown Citadel 10"] = GroupBuilder.IcecrownCitadel10Template,
+    ["Ruby Sanctum 25"] = GroupBuilder.RubySanctum25Template,
+    ["Ruby Sanctum 10"] = GroupBuilder.RubySanctum10Template,
 }

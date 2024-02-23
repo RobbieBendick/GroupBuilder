@@ -1,5 +1,6 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local LibDBIcon = LibStub("LibDBIcon-1.0");
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 GroupBuilder.Config = {};
 local Config = GroupBuilder.Config;
 local GBConfig;
@@ -24,34 +25,28 @@ local defaults = {
         constructMessageIsActive = false,
         outOfMaxPlayers = 0,
     }
-}
+};
 
 local raidInstanceDropdownValues = {
-    ["None"] = "None",
     ["Icecrown Citadel 25"] = "Icecrown Citadel 25",
     ["Icecrown Citadel 10"] = "Icecrown Citadel 10",
-}
+    ["Ruby Sanctum 25"] = "Ruby Sanctum 25",
+    ["Ruby Sanctum 10"] = "Ruby Sanctum 10",
+    ["None"] = "None",
+};
 
 local raidInstanceDropdownAcronyms = {
     ["ICC 25"] = "Icecrown Citadel 25",
     ["ICC 10"] = "Icecrown Citadel 10",
     ["RS 25"] = "Ruby Sanctum 25",
     ["RS 10"] = "Ruby Sanctum 10",
-}
+};
 
 function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
 end
 
-function Config:GetKeyByValue(tbl, value)
-    for k, v in pairs(tbl) do
-        if v == value then
-            return k;
-        end
-    end
-    return nil;
-end
 
 function Config:CreateMenu()
     GBConfig = CreateFrame("Frame", "GroupBuilderConfig", UIParent);
@@ -62,6 +57,184 @@ function Config:CreateMenu()
     GBConfig.title:SetParent(GBConfig);
     GBConfig.title:SetPoint("TOPLEFT", 16, -16);
     GBConfig.title:SetText(GBConfig.name);
+
+    local advertisementMessageOptions = {
+        name = "Advertising Message",
+        type = "group",
+        args = {
+            message = {
+                order = 1,
+                name = "Advertising Message",
+                desc = "Advertising message for LFG",
+                type = "input",
+                width = "full",
+                set = function(info, value) 
+                    GroupBuilder.db.profile.message = value;
+                end,
+                get = function(info) 
+                    return GroupBuilder.db.profile.message;
+                end,
+                validate = function(info, value)
+                    return #value <= 255;
+                end,
+                disabled = function (info)
+                    return GroupBuilder.db.profile.constructMessageIsActive;
+                end
+            },
+            enableConstructAdvertisementMessage = {
+                order = 2,
+                type = "toggle",
+                name = "Construct An Advertising Message",
+                desc = "Enable or disable current settings to construct an advertising message",
+                width = "full",
+                set = function(info, value)
+                    GroupBuilder.db.profile.constructMessageIsActive = not GroupBuilder.db.profile.constructMessageIsActive;
+                end,
+                get = function(info)
+                    return GroupBuilder.db.profile.constructMessageIsActive;
+                end,
+            },
+            raidTypeGroup = {
+                order = 3,
+                type = "group",
+                inline = true,
+                name = "Raid Options",
+                args = {
+                    raidDropdown = {
+                        order = 1,
+                        type = "select",
+                        name = "Raid Instance",
+                        desc = "Select the raid instance you want to advertise for.",
+                        values = raidInstanceDropdownAcronyms,
+                        width = "normal",
+                        set = function (info, value)
+                            GroupBuilder.db.profile.selectedAdvertisementRaid = value;
+                        end,
+                        get = function (info)
+                            return GroupBuilder.db.profile.selectedAdvertisementRaid;
+                        end,
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                    },
+                    raidTypeDropdown = {
+                        order = 2,
+                        type = "select",
+                        name = "Raid Type",
+                        desc = "Select the raid type.",
+                        values = {
+                            ["SR"] = "SR",
+                            ["SR (MS/OS)"] = "SR (MS/OS)",
+                            ["MS/OS"] = "MS/OS",
+                            ["GDKP"] = "GDKP",
+                        },
+                        width = "normal",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.selectedRaidType = value;
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.selectedRaidType;
+                        end,
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                    },
+                    secondaryRaidTypeDropdownSR = {
+                        order = 3,
+                        type = "select",
+                        name = "More Raid Info",
+                        desc = "More raid info.",
+                        values = {
+                            ["2x"] = "2x",
+                            ["3x"] = "3x",
+                            ["4x"] = "4x",
+                        },
+                        width = "normal",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.selectedSRRaidInfo = value;
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.selectedSRRaidInfo;
+                        end,
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                        hidden = function(info)
+                            return GroupBuilder.db.profile.selectedRaidType ~= "SR" and GroupBuilder.db.profile.selectedRaidType ~= "SR (MS/OS)";
+                        end
+                    },
+                    secondaryRaidTypeDropdownGDKP = {
+                        order = 3,
+                        type = "select",
+                        name = "More Raid Info",
+                        desc = "More raid info.",
+                        values = {
+                            ["2kg/6kg"] = "2kg/6kg",
+                            ["3kg/7kg"] = "3kg/7kg",
+                            ["4kg/8kg"] = "4kg/8kg",
+                        },
+                        width = "normal",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.selectedGDKPRaidInfo = value;
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.selectedGDKPRaidInfo;
+                        end,
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                        hidden = function(info)
+                            return GroupBuilder.db.profile.selectedRaidType ~= "GDKP";
+                        end
+                    },
+                }
+            },
+            advertisingGroupSize = {
+                order = 4,
+                type = "group",
+                inline = true,
+                name = "Add Group Size To Message",
+                args = {
+                    advertisingMinGroupSize = {
+                        order = 1,
+                        type = "input",
+                        name = "At Least",
+                        desc = "Number of players required in the group before adding the group size to the advertisement message. (0 or empty to disable)",
+                        width = "normal",
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                        set = function(info, value)
+                            GroupBuilder.db.profile.minPlayersForAdvertisingCount = tonumber(value) or 26;
+                        end,
+                        get = function(info)
+                            return tostring(GroupBuilder.db.profile.minPlayersForAdvertisingCount or "");
+                        end,
+                    },
+                    advertisingGroupSizeMax = {
+                        order = 2,
+                        type = "select",
+                        values = {
+                            ["10"] = 10,
+                            ["25"] = 25
+                        },
+                        name = "Out Of",
+                        desc = "Total number of players expected in your raid (10/25)",
+                        width = "normal",
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                        set = function(info, value)
+                            GroupBuilder.db.profile.outOfMaxPlayers = tonumber(value) or 0;
+                        end,
+                        get = function(info)
+                            return tostring(GroupBuilder.db.profile.outOfMaxPlayers or "");
+                        end,
+                    },
+                },
+            },
+        }
+    };
 
     local options = {
         name = "GroupBuilder",
@@ -129,167 +302,6 @@ function Config:CreateMenu()
                             return GroupBuilder.db.profile.selectedRaidTemplate;
                         end,
                     },
-                },
-            },
-            advertisingOptions = {
-                order = 3,
-                type = "group",
-                inline = false,
-                name = "Advertising Message",
-                args = {
-                    enableConstructAdvertisementMessage = {
-                        order = 1,
-                        type = "toggle",
-                        name = "Construct An Advertising Message",
-                        desc = "Enable or disable current settings to construct an advertising message",
-                        width = "full",
-                        set = function(info, value)
-                            GroupBuilder.db.profile.constructMessageIsActive = not GroupBuilder.db.profile.constructMessageIsActive;
-                        end,
-                        get = function(info)
-                            return GroupBuilder.db.profile.constructMessageIsActive;
-                        end,
-                    },
-                    raidTypeGroup = {
-                        order = 2,
-                        type = "group",
-                        inline = true,
-                        name = "Raid Options",
-                        args = {
-                            raidDropdown = {
-                                order = 1,
-                                type = "select",
-                                name = "Raid Instance",
-                                desc = "Select the raid instance you want to advertise for.",
-                                values = raidInstanceDropdownAcronyms,
-                                width = "normal",
-                                set = function (info, value)
-                                    GroupBuilder.db.profile.selectedAdvertisementRaid = value;
-                                end,
-                                get = function (info)
-                                    return GroupBuilder.db.profile.selectedAdvertisementRaid;
-                                end,
-                                disabled = function(info)
-                                    return not GroupBuilder.db.profile.constructMessageIsActive;
-                                end,
-                            },
-                            raidTypeDropdown = {
-                                order = 2,
-                                type = "select",
-                                name = "Raid Type",
-                                desc = "Select the raid type.",
-                                values = {
-                                    ["SR"] = "SR",
-                                    ["SR (MS/OS)"] = "SR (MS/OS)",
-                                    ["MS/OS"] = "MS/OS",
-                                    ["GDKP"] = "GDKP",
-                                },
-                                width = "normal",
-                                set = function(info, value)
-                                    GroupBuilder.db.profile.selectedRaidType = value;
-                                end,
-                                get = function(info)
-                                    return GroupBuilder.db.profile.selectedRaidType;
-                                end,
-                                disabled = function(info)
-                                    return not GroupBuilder.db.profile.constructMessageIsActive;
-                                end,
-                            },
-                            secondaryRaidTypeDropdownSR = {
-                                order = 3,
-                                type = "select",
-                                name = "More Raid Info",
-                                desc = "More raid info.",
-                                values = {
-                                    ["2x"] = "2x",
-                                    ["3x"] = "3x",
-                                    ["4x"] = "4x",
-                                },
-                                width = "normal",
-                                set = function(info, value)
-                                    GroupBuilder.db.profile.selectedSRRaidInfo = value;
-                                end,
-                                get = function(info)
-                                    return GroupBuilder.db.profile.selectedSRRaidInfo;
-                                end,
-                                disabled = function(info)
-                                    return not GroupBuilder.db.profile.constructMessageIsActive;
-                                end,
-                                hidden = function(info)
-                                    return GroupBuilder.db.profile.selectedRaidType ~= "SR" and GroupBuilder.db.profile.selectedRaidType ~= "SR (MS/OS)";
-                                end
-                            },
-                            secondaryRaidTypeDropdownGDKP = {
-                                order = 3,
-                                type = "select",
-                                name = "More Raid Info",
-                                desc = "More raid info.",
-                                values = {
-                                    ["2kg/6kg"] = "2kg/6kg",
-                                    ["3kg/7kg"] = "3kg/7kg",
-                                    ["4kg/8kg"] = "4kg/8kg",
-                                },
-                                width = "normal",
-                                set = function(info, value)
-                                    GroupBuilder.db.profile.selectedGDKPRaidInfo = value;
-                                end,
-                                get = function(info)
-                                    return GroupBuilder.db.profile.selectedGDKPRaidInfo;
-                                end,
-                                disabled = function(info)
-                                    return not GroupBuilder.db.profile.constructMessageIsActive;
-                                end,
-                                hidden = function(info)
-                                    return GroupBuilder.db.profile.selectedRaidType ~= "GDKP";
-                                end
-                            },
-                        }
-                    },
-                    advertisingGroupSize = {
-                        order = 3,
-                        type = "group",
-                        inline = true,
-                        name = "Add Group Size To Message",
-                        args = {
-                            advertisingMinGroupSize = {
-                                order = 1,
-                                type = "input",
-                                name = "At Least",
-                                desc = "Number of players required in the group before adding the group size to the advertisement message. (0 or empty to disable)",
-                                width = "normal",
-                                disabled = function(info)
-                                    return not GroupBuilder.db.profile.constructMessageIsActive;
-                                end,
-                                set = function(info, value)
-                                    GroupBuilder.db.profile.minPlayersForAdvertisingCount = tonumber(value) or 26;
-                                end,
-                                get = function(info)
-                                    return tostring(GroupBuilder.db.profile.minPlayersForAdvertisingCount or "");
-                                end,
-                            },
-                            advertisingGroupSizeMax = {
-                                order = 2,
-                                type = "select",
-                                values = {
-                                    ["10"] = 10,
-                                    ["25"] = 25
-                                },
-                                name = "Out Of",
-                                desc = "Total number of players expected in your raid (10/25)",
-                                width = "normal",
-                                disabled = function(info)
-                                    return not GroupBuilder.db.profile.constructMessageIsActive;
-                                end,
-                                set = function(info, value)
-                                    GroupBuilder.db.profile.outOfMaxPlayers = tonumber(value) or 0;
-                                end,
-                                get = function(info)
-                                    return tostring(GroupBuilder.db.profile.outOfMaxPlayers or "");
-                                end,
-                            },
-                        },
-                    },
-                    
                 },
             },
             groupRequirements = {
@@ -403,15 +415,17 @@ function Config:CreateMenu()
         }
     }
 
+    -- register options table for the main "GroupBuilder" addon
     LibStub("AceConfig-3.0"):RegisterOptionsTable("GroupBuilder", options);
-    local success, errorMessage = pcall(function()
-        self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
-    end)
-    
-    if not success then
-        print("Error setting up menu:", errorMessage)
-    end
 
+    -- register options table for the "GroupBuilder_AdvertisingMessage" subcategory
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("GroupBuilder_AdvertisingMessage", advertisementMessageOptions);
+
+    -- add addon to the Blizzard options panel
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
+
+    -- Add the "GroupBuilder_AdvertisingMessage" subcategory under the "Advertising Message" category
+    self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder_AdvertisingMessage", "Advertising Message", "GroupBuilder");
     GBConfig:Hide();
 end
 
@@ -465,10 +479,11 @@ function Config:CreateAdvertisementMessage()
     if not GroupBuilder.db.profile.selectedRaidType then return end
     if not GroupBuilder.db.profile.selectedGDKPRaidInfo or not GroupBuilder.db.profile.selectedSRRaidInfo then return end
     local raidName = GroupBuilder.db.profile.selectedAdvertisementRaid;
+    local minPlayersForAdvertisingCountIsValid = GroupBuilder.db.profile.minPlayersForAdvertisingCount ~= "" or tonumber(GroupBuilder.db.profile.minPlayersForAdvertisingCount) ~= 0;
     local messageToSend = "LFM " .. raidName;
 
     -- (10/25)
-    if GroupBuilder.db.profile.minPlayersForAdvertisingCount and GetNumGroupMembers() >= GroupBuilder.db.profile.minPlayersForAdvertisingCount then
+    if minPlayersForAdvertisingCountIsValid and GetNumGroupMembers() >= GroupBuilder.db.profile.minPlayersForAdvertisingCount then
         messageToSend = messageToSend .. " (" .. GetNumGroupMembers() .. "/" .. GroupBuilder.db.profile.outOfMaxPlayers .. ")";
     end
 
@@ -487,19 +502,19 @@ function Config:CreateAdvertisementMessage()
     -- TODO: if there are atleast 15 players, find missing roles and place in the message.
 
 
-    SendChatMessage(messageToSend, "WHISPER", nil, "Floydsr");
+    SendChatMessage(messageToSend, "WHISPER", nil, "Robertdogert");
 end
 
 function AdvertiseLFG()
     if GroupBuilder.db.profile.constructMessageIsActive then
         return Config:CreateAdvertisementMessage();
     end
-    if not GroupBuilder.db.profile.message then 
+    if GroupBuilder.db.profile.message == "" then
         return print("Please enter an advertisement message.");
     end
     if Config:IsInLookingForGroup() then
         local lookingForGroupChannelID = Config:FindLFGChannelIndex();
-        SendChatMessage(GroupBuilder.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
+        SendChatMessage(GroupBuilder.db.profile.message, "WHISPER", nil, "Robertdogert");
     else
         ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, "LookingForGroup");
         print("Advertisement failed because you're not in the LookingForGroup channel.");
@@ -512,6 +527,9 @@ function AdvertiseLFG()
 end
 
 function AdvertiseTrade()
+    if GroupBuilder.db.profile.constructMessageIsActive then
+        return Config:CreateAdvertisementMessage();
+    end
     if not GroupBuilder.db.profile.message then 
         return print("Please enter an advertisement message.");
     end
