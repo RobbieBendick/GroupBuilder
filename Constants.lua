@@ -56,3 +56,16 @@ GroupBuilder.roles = {
         "balance",
     },
 };
+
+GroupBuilder.classes = {
+    "ROGUE",
+    "WARRIOR",
+    "PRIEST",
+    "MAGE",
+    "PALADIN",
+    "HUNTER",
+    "DEATHKNIGHT",
+    "SHAMAN",
+    "WARLOCK",
+    "DRUID"
+};

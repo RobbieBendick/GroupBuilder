@@ -47,6 +47,50 @@ function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
 end
 
+function Config:GenerateClassTabs()
+    local classTabs = {}
+
+    for i, className in ipairs(GroupBuilder.classes) do
+        classTabs[className .. "Tab"] = {
+            order = i,
+            type = "group",
+            name = className:sub(1, 1) .. className:sub(2):lower(),
+            args = {
+                [className .. "Minimum"] = {
+                    order = 1,
+                    type = "input",
+                    name = "Minimum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s",
+                    desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If minimum is 3, the group won't fill until it reaches 3 Rogues)",
+                    width = "normal",
+                    set = function(info, value)
+                        local fullName = className .. "Minimum";
+                        GroupBuilder.db.profile[fullName] = value;
+                    end,
+                    get = function(info)
+                        local fullName = className .. "Minimum";
+                        return GroupBuilder.db.profile[fullName];
+                    end,
+                },
+                [className .. "Maximum"] = {
+                    order = 1,
+                    type = "input",
+                    name = "Maximum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s",
+                    desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If maximum is 0, the group won't fill that class)",
+                    width = "normal",
+                    set = function(info, value)
+                        local fullName = className .. "Maximum";
+                        GroupBuilder.db.profile[fullName] = value;
+                    end,
+                    get = function(info)
+                        local fullName = className .. "Maximum";
+                        return GroupBuilder.db.profile[fullName];
+                    end,
+                },
+            },
+        }
+    end
+    return classTabs;
+end
 
 function Config:CreateMenu()
     GBConfig = CreateFrame("Frame", "GroupBuilderConfig", UIParent);
@@ -57,6 +101,8 @@ function Config:CreateMenu()
     GBConfig.title:SetParent(GBConfig);
     GBConfig.title:SetPoint("TOPLEFT", 16, -16);
     GBConfig.title:SetText(GBConfig.name);
+
+    local classTabs = Config:GenerateClassTabs();
 
     local advertisementMessageOptions = {
         name = "Advertising Message",
@@ -190,7 +236,7 @@ function Config:CreateMenu()
                 }
             },
             advertisingGroupSize = {
-                order = 4,
+                order = 6,
                 type = "group",
                 inline = true,
                 name = "Add Group Size To Message",
@@ -390,6 +436,16 @@ function Config:CreateMenu()
                     }
                 },
             },
+            classesTabGroup = {
+                order = 4,
+                type = "group",
+                inline = false,
+                descStyle = "inline",
+                childGroups = "tab",
+                name = "Class Specific",
+                args = classTabs,
+            },
+
             activateButton = {
                 order = 7,
                 type = "execute",
