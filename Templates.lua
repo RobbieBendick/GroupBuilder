@@ -1,4 +1,5 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 function GroupBuilder:NoneTemplate()
     GroupBuilder.db.profile.maxDPS = 0;
@@ -7,6 +8,7 @@ function GroupBuilder:NoneTemplate()
     GroupBuilder.db.profile.maxRangedDPS = 0;
     GroupBuilder.db.profile.maxMeleeDPS = 0;
     GroupBuilder.db.profile.minGearscore = 0;
+    GroupBuilder.db.profile.maxTotalPlayers = 0;
 end
 
 function GroupBuilder:CheckForPlayerRole()
@@ -32,7 +34,9 @@ function GroupBuilder:IcecrownCitadel25Template()
     GroupBuilder.db.profile.maxRangedDPS = 10;
     GroupBuilder.db.profile.maxMeleeDPS = 10;
     GroupBuilder.db.profile.minGearscore = 5600;
+    GroupBuilder.db.profile.maxTotalPlayers = 25;
     GroupBuilder:CheckForPlayerRole();
+    AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
 
 function GroupBuilder:IcecrownCitadel10Template()
@@ -42,7 +46,9 @@ function GroupBuilder:IcecrownCitadel10Template()
     GroupBuilder.db.profile.maxRangedDPS = 4;
     GroupBuilder.db.profile.maxMeleeDPS = 4;
     GroupBuilder.db.profile.minGearscore = 5400;
+    GroupBuilder.db.profile.maxTotalPlayers = 10;
     GroupBuilder:CheckForPlayerRole();
+    AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
 
 function GroupBuilder:RubySanctum10Template()
@@ -52,7 +58,9 @@ function GroupBuilder:RubySanctum10Template()
     GroupBuilder.db.profile.maxRangedDPS = 4;
     GroupBuilder.db.profile.maxMeleeDPS = 4;
     GroupBuilder.db.profile.minGearscore = 5400;
+    GroupBuilder.db.profile.maxTotalPlayers = 10;
     GroupBuilder:CheckForPlayerRole();
+    AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
 
 function GroupBuilder:RubySanctum25Template()
@@ -62,7 +70,9 @@ function GroupBuilder:RubySanctum25Template()
     GroupBuilder.db.profile.maxRangedDPS = 10;
     GroupBuilder.db.profile.maxMeleeDPS = 10;
     GroupBuilder.db.profile.minGearscore = 5600;
+    GroupBuilder.db.profile.maxTotalPlayers = 25;
     GroupBuilder:CheckForPlayerRole();
+    AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
 
 

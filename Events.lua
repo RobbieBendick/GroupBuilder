@@ -2,6 +2,7 @@ local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local Config = GroupBuilder.Config;
 
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
+
     if GroupBuilder.db.profile.isPaused then return end
 
     local gearscoreNumber = GroupBuilder:FindGearscore(message);
@@ -11,19 +12,17 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     local role = GroupBuilder:FindRole(message);
     if not role then return end
-    
     local maxRoleValues = {
         ["ranged_dps"] = GroupBuilder.db.profile.maxRangedDPS,
         ["melee_dps"] = GroupBuilder.db.profile.maxMeleeDPS,
         ["tank"] = GroupBuilder.db.profile.maxTanks,
         ["healer"] = GroupBuilder.db.profile.maxHealers
     };
-
-    for role, max in pairs(maxRoleValues) do
-        if role == "ranged_dps" or role == "melee_dps" then
-            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(role) >= max then return end
+    for roleName, max in pairs(maxRoleValues) do
+        if roleName == "ranged_dps" or roleName == "melee_dps" then
+            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(roleName) >= max then return end
         else
-            if GroupBuilder:CountPlayersByRole(role) >= max then return end
+            if GroupBuilder:CountPlayersByRole(roleName) >= max then return end
         end
     end
 
@@ -31,11 +30,30 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     local _, whispererClass = UnitClass(whispererCharacterName);
 
     -- check maximum of this particular class
-    if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
+    if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder.db.profile[whispererClass.."Maximum"] ~= "" and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
         return self:Print("Too many " .. whispererClass:sub(1,1) .. whispererClass:sub(2):lower() .. "s");
     end
 
-    -- TODO: add up all the leftover required minimum players needed.
+
+    if not GroupBuilder.db.profile.maxTotalPlayers then
+        return self:Print("Please set the total number of expected players in the Group Requirements options page.");
+    end
+
+    -- check if we have room with minmum number of other classes we need in mind
+    if GroupBuilder:IsClassNeededForMinimum(whispererClass) then
+        if GetNumGroupMembers() + GroupBuilder:FindTotalMinimumOfMissingClasses() - 1 >= GroupBuilder.db.profile.maxTotalPlayers then
+            return self:Print("Too many players, Need room for selected minimum classes.");
+        end
+    else
+        if GetNumGroupMembers() + GroupBuilder:FindTotalMinimumOfMissingClasses() >= GroupBuilder.db.profile.maxTotalPlayers then
+            return self:Print("Too many players, Need room for selected minimum classes.");
+        end
+    end
+
+    -- check max role and class (ex: only 1 healer paladin)
+    if GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= nil and GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= "" and GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass) >= tonumber(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]) then
+        return self:Print("Too many " .. role:gsub("_", " ") ..  " " .. whispererClass:lower() .. "s");
+    end
 
     -- invite them
     local minTimeToInvite, maxTimeToInvite = 4, 10;

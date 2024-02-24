@@ -6,24 +6,10 @@ local Config = GroupBuilder.Config;
 local GBConfig;
 local defaults = {
     profile = {
-        maxHealers = 0,
-        maxDPS = 0,
-        maxTanks = 0,
-        minGearscore = 0,
-        maxRangedDPS = 0,
-        maxMeleeDPS = 0,
-        message = "",
         minimapCoords = {},
         isPaused = true,
-        selectedRaidTemplate = "",
-        selectedRole = "",
-        selectedRaidType = "",
-        selectedSRRaidInfo = "",
-        selectedGDKPRaidInfo = "",
-        selectedAdvertisementRaid = "",
         minPlayersForAdvertisingCount = 15,
         constructMessageIsActive = false,
-        outOfMaxPlayers = 0,
     }
 };
 
@@ -35,16 +21,83 @@ local raidInstanceDropdownValues = {
     ["None"] = "None",
 };
 
-local raidInstanceDropdownAcronyms = {
-    ["ICC 25"] = "Icecrown Citadel 25",
-    ["ICC 10"] = "Icecrown Citadel 10",
-    ["RS 25"] = "Ruby Sanctum 25",
-    ["RS 10"] = "Ruby Sanctum 10",
-};
+
 
 function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
+end
+
+function GroupBuilder:GetKeyByValue(tbl, value)
+    for k, v in pairs(tbl) do
+        if v == value then
+            return k;
+        end
+    end
+    return nil;
+end
+
+function GroupBuilder:FindClassCount(class)
+    if not class then return end
+    local count = 0;
+    for characterName, characterData in pairs(GroupBuilder.raidTable) do
+        if characterData.class == class then
+            count = count + 1;
+        end
+    end
+    for characterName, characterData in pairs(GroupBuilder.invitedTable) do
+        if characterData.class == class then
+            count = count + 1;
+        end
+    end
+    return count;
+end
+
+
+function GroupBuilder:CountPlayersByRole(table, role)
+    local count = 0;
+    if role == "dps" then
+        for _, playerData in pairs(GroupBuilder.raidTable) do
+            if playerData.role == "melee_dps" or playerData.role == "ranged_dps" then
+                count = count + 1;
+            end
+        end
+    else
+        for _, playerData in pairs(GroupBuilder.raidTable) do
+            if playerData.role == role then
+                count = count + 1;
+            end
+        end
+    end
+    return count;
+end
+
+function GroupBuilder:CountPlayersByRoleAndClass(role, class)
+    if not role or not class then return end
+    local count = 0;
+    for characterName, characterData in pairs(GroupBuilder.raidTable) do
+        if characterData.role == role and characterData.class == class then
+            count = count + 1;
+        end
+    end
+    for characterName, characterData in pairs(GroupBuilder.invitedTable) do
+        if characterData.role == role and characterData.class == class then
+            count = count + 1;
+        end
+    end
+    return count;
+end
+
+function GroupBuilder:IsClassNeededForMinimum(class)
+    if not class then return end
+    local classMinimum = GroupBuilder.db.profile[class.."Minimum"];
+    if classMinimum ~= nil and tonumber(classMinimum) ~= 0 and classMinimum ~= "" then
+        if GroupBuilder:FindClassCount(class) < tonumber(classMinimum) then
+            return true;
+        end
+    else
+        return false;
+    end
 end
 
 function Config:GenerateClassTabs()
@@ -91,6 +144,46 @@ function Config:GenerateClassTabs()
     end
     return classTabs;
 end
+function Config:GenerateRoleTabs()
+    local roleTabs = {};
+    local i = 1;
+    for roleName, keyWordList in pairs(GroupBuilder.roles) do
+        roleTabs[roleName .. "Tab"] = {
+            order = i,
+            type = "group",
+            name = roleName:gsub("_", " "),
+            args = {}
+        }
+        for _, classList in pairs(GroupBuilder.roleClasses) do
+            for i, class in ipairs(classList) do
+                if GroupBuilder:Contains(GroupBuilder.roleClasses[roleName], class) then
+                    roleTabs[roleName .. "Tab"].args[roleName .. class .. "Tab"] = {
+                        order = i,
+                        type = "group",
+                        name = class:sub(1,1) .. class:sub(2):lower(),
+                        desc = class, 
+                        args = {
+                            [roleName .. class .. "Maxmimum"] = {
+                                order = 1,
+                                type = "input",
+                                name = "Maximum " .. roleName:gsub("_", " ") .. " " .. class:sub(1,1) .. class:sub(2):lower() .."s",
+                                desc = "Maximum " .. roleName:gsub("_", " ") .. " " .. class:sub(1,1) .. class:sub(2):lower() .."s", 
+                                width = "normal",
+                                get = function (info)
+                                    return tostring(GroupBuilder.db.profile[roleName .. class .. "Maximum"] or "");
+                                end,
+                                set = function (info, value)
+                                    GroupBuilder.db.profile[roleName .. class .. "Maximum"] = value;
+                                end,
+                            }
+                        }
+                    }
+                end
+            end
+        end
+    end
+    return roleTabs;
+end
 
 function Config:CreateMenu()
     GBConfig = CreateFrame("Frame", "GroupBuilderConfig", UIParent);
@@ -103,6 +196,7 @@ function Config:CreateMenu()
     GBConfig.title:SetText(GBConfig.name);
 
     local classTabs = Config:GenerateClassTabs();
+    local roleTabs = Config:GenerateRoleTabs();
 
     local advertisementMessageOptions = {
         name = "Advertising Message",
@@ -151,7 +245,7 @@ function Config:CreateMenu()
                         type = "select",
                         name = "Raid Instance",
                         desc = "Select the raid instance you want to advertise for.",
-                        values = raidInstanceDropdownAcronyms,
+                        values = GroupBuilder.raidInstanceDropdownAcronyms,
                         width = "normal",
                         set = function (info, value)
                             GroupBuilder.db.profile.selectedAdvertisementRaid = value;
@@ -188,8 +282,8 @@ function Config:CreateMenu()
                     secondaryRaidTypeDropdownSR = {
                         order = 3,
                         type = "select",
-                        name = "More Raid Info",
-                        desc = "More raid info.",
+                        name = "Amount Of SR's",
+                        desc = "The amount of SR's you want your SR raid to have.",
                         values = {
                             ["2x"] = "2x",
                             ["3x"] = "3x",
@@ -212,8 +306,8 @@ function Config:CreateMenu()
                     secondaryRaidTypeDropdownGDKP = {
                         order = 3,
                         type = "select",
-                        name = "More Raid Info",
-                        desc = "More raid info.",
+                        name = "Amount For Min/Max Bid",
+                        desc = "Select the min and max bid amount you want for your GDKP.",
                         values = {
                             ["2kg/6kg"] = "2kg/6kg",
                             ["3kg/7kg"] = "3kg/7kg",
@@ -233,6 +327,21 @@ function Config:CreateMenu()
                             return GroupBuilder.db.profile.selectedRaidType ~= "GDKP";
                         end
                     },
+                    heroicBossCount = {
+                        order = 4,
+                        type = "input",
+                        name = "Amount Of Heroic Bosses",
+                        desc = "Select the amount of heroic bosses you expect your raid to kill.",
+                        set = function(info, value)
+                            GroupBuilder.db.profile.advertisementHeroicBossCount = value;
+                        end,
+                        get = function(info)
+                            return GroupBuilder.db.profile.advertisementHeroicBossCount;
+                        end,
+                        disabled = function(info)
+                            return not GroupBuilder.db.profile.constructMessageIsActive;
+                        end,
+                    }
                 }
             },
             advertisingGroupSize = {
@@ -356,8 +465,25 @@ function Config:CreateMenu()
                 inline = true,
                 name = "Group Requirements",
                 args = {
-                    tanks = {
+                    maxTotalPlayers = {
                         order = 1,
+                        name = "Total Players",
+                        desc = "Total amount of players expected to be in your raid.",
+                        type = "select",
+                        width = "normal",
+                        values = {
+                            ["10"] = 10,
+                            ["25"] = 25
+                        },
+                        set = function(info, value)
+                            GroupBuilder.db.profile.maxTotalPlayers = tonumber(value);
+                        end,
+                        get = function(info)
+                            return tostring(GroupBuilder.db.profile.maxTotalPlayers);
+                        end
+                    },
+                    tanks = {
+                        order = 2,
                         name = "Tanks",
                         desc = "Number of tanks",
                         type = "input",
@@ -370,7 +496,7 @@ function Config:CreateMenu()
                         end
                     }, 
                     maxHealers = {
-                        order = 2,
+                        order = 3,
                         name = "Healers",
                         desc = "Number of healers",
                         type = "input",
@@ -383,7 +509,7 @@ function Config:CreateMenu()
                         end
                     },
                     maxDPS = {
-                        order = 3,
+                        order = 4,
                         name = "DPS",
                         desc = "Number of DPS",
                         type = "input",
@@ -396,7 +522,7 @@ function Config:CreateMenu()
                         end
                     },
                     maxRangedDPS = {
-                        order = 4,
+                        order = 5,
                         name = "Max Ranged DPS",
                         desc = "Maximum number of ranged DPS",
                         type = "input",
@@ -409,7 +535,7 @@ function Config:CreateMenu()
                         end
                     },
                     maxMeleeDPS = {
-                        order = 5,
+                        order = 6,
                         name = "Max Melee DPS",
                         desc = "Maximum number of melee DPS",
                         type = "input",
@@ -422,7 +548,7 @@ function Config:CreateMenu()
                         end
                     },
                     gearscore = {
-                        order = 6,
+                        order = 7,
                         name = "Minimum Gearscore",
                         desc = "Minimum gearscore required to join the group.",
                         type = "input",
@@ -444,6 +570,16 @@ function Config:CreateMenu()
                 childGroups = "tab",
                 name = "Class Specific",
                 args = classTabs,
+            },
+
+            rolesAndClassesTabGroup = {
+                order = 5,
+                type = "group",
+                inline = false,
+                descStyle = "inline",
+                childGroups = "tab",
+                name = "Role And Class Specific",
+                args = roleTabs,
             },
 
             activateButton = {
@@ -529,34 +665,55 @@ function Config:FindTradeChannelIndex()
     return nil;
 end
 
-function Config:CreateAdvertisementMessage()
-    if not GroupBuilder.db.profile.constructMessageIsActive then return end
-    if not GroupBuilder.db.profile.selectedAdvertisementRaid then return end
-    if not GroupBuilder.db.profile.selectedRaidType then return end
-    if not GroupBuilder.db.profile.selectedGDKPRaidInfo or not GroupBuilder.db.profile.selectedSRRaidInfo then return end
-    local raidName = GroupBuilder.db.profile.selectedAdvertisementRaid;
-    local minPlayersForAdvertisingCountIsValid = GroupBuilder.db.profile.minPlayersForAdvertisingCount ~= "" or tonumber(GroupBuilder.db.profile.minPlayersForAdvertisingCount) ~= 0;
-    local messageToSend = "LFM " .. raidName;
-
-    -- (10/25)
-    if minPlayersForAdvertisingCountIsValid and GetNumGroupMembers() >= GroupBuilder.db.profile.minPlayersForAdvertisingCount then
-        messageToSend = messageToSend .. " (" .. GetNumGroupMembers() .. "/" .. GroupBuilder.db.profile.outOfMaxPlayers .. ")";
+function GroupBuilder:FindTotalMinimumOfMissingClasses()
+    local count = 0;
+    for i, className in ipairs(GroupBuilder.classes) do
+        local minimumOfClass = GroupBuilder.db.profile[className.."Minimum"];
+        if minimumOfClass ~= nil and minimumOfClass ~= "" then
+            count = count + ( tonumber(minimumOfClass) - GroupBuilder:FindClassCount(className) );
+        end
     end
+    return count;
+end
+
+
+function Config:CreateAdvertisementMessage()
+    if not GroupBuilder.db.profile.selectedAdvertisementRaid then 
+        return GroupBuilder:Print("Please select an advertisement raid in the Advertising Message options.");
+    end
+    if not GroupBuilder.db.profile.selectedRaidType then 
+        return GroupBuilder:Print("Please select a raid type in the Advertising Message options.");
+    end
+    local raidName = GroupBuilder.db.profile.selectedAdvertisementRaid;
+    local minPlayersForAdvertisingCountIsValid = GroupBuilder.db.profile.minPlayersForAdvertisingCount or tonumber(GroupBuilder.db.profile.minPlayersForAdvertisingCount) ~= 0;
+    local messageToSend = "LFM " .. raidName;
 
     -- ICC 10
     if GroupBuilder.db.profile.selectedRaidType then
         messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedRaidType;
     end
 
+    -- (10/25)
+    if GroupBuilder.db.profile.minPlayersForAdvertisingCount and minPlayersForAdvertisingCountIsValid and GetNumGroupMembers() >= tonumber(GroupBuilder.db.profile.minPlayersForAdvertisingCount) then
+        messageToSend = messageToSend .. " (" .. GetNumGroupMembers() .. "/" .. GroupBuilder.db.profile.outOfMaxPlayers .. ")";
+    end
+
     -- GDKP or SR etc
-    if GroupBuilder.db.profile.selectedRaidType == "GDKP" then
+    if GroupBuilder.db.profile.selectedGDKPRaidInfo and GroupBuilder.db.profile.selectedRaidType == "GDKP" then
         messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedGDKPRaidInfo;
-    elseif GroupBuilder.db.profile.selectedRaidType == "SR" or GroupBuilder.db.profile.selectedRaidType == "SR (MS/OS)" then
+    elseif GroupBuilder.db.profile.selectedSRRaidInfo and GroupBuilder.db.profile.selectedRaidType == "SR" or GroupBuilder.db.profile.selectedRaidType == "SR (MS/OS)" then
         messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedSRRaidInfo;
     end
 
-    -- TODO: if there are atleast 15 players, find missing roles and place in the message.
+    if GroupBuilder.db.profile.advertisementHeroicBossCount then
+        if not GroupBuilder.db.profile.selectedAdvertisementRaid then
+            GroupBuilder:Print("Please select a raid instance in the GroupBuilder Advertising Message settings.")
+        else
+            messageToSend = messageToSend .. " (" .. GroupBuilder.db.profile.advertisementHeroicBossCount .. " HC)" 
+        end
+    end 
 
+    -- TODO: if there are atleast 15 players, find most missing-est roles and place in the message.
 
     SendChatMessage(messageToSend, "WHISPER", nil, "Robertdogert");
 end
