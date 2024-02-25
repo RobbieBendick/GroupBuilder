@@ -21,8 +21,6 @@ local raidInstanceDropdownValues = {
     ["None"] = "None",
 };
 
-
-
 function Config:Toggle()
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
     InterfaceOptionsFrame_OpenToCategory(GBConfig);
@@ -686,7 +684,7 @@ function Config:CreateAdvertisementMessage()
     end
     local raidName = GroupBuilder.db.profile.selectedAdvertisementRaid;
     local minPlayersForAdvertisingCountIsValid = GroupBuilder.db.profile.minPlayersForAdvertisingCount or tonumber(GroupBuilder.db.profile.minPlayersForAdvertisingCount) ~= 0;
-    local messageToSend = "LFM " .. raidName;
+    local messageToSend = "LFM " .. raidName .. "m";
 
     -- ICC 10
     if GroupBuilder.db.profile.selectedRaidType then

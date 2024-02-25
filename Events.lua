@@ -39,7 +39,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         return self:Print("Please set the total number of expected players in the Group Requirements options page.");
     end
 
-    -- check if we have room with minmum number of other classes we need in mind
+    -- check if we have room with minimum number of other classes we need in mind
     if GroupBuilder:IsClassNeededForMinimum(whispererClass) then
         if GetNumGroupMembers() + GroupBuilder:FindTotalMinimumOfMissingClasses() - 1 >= GroupBuilder.db.profile.maxTotalPlayers then
             return self:Print("Too many players, Need room for selected minimum classes.");
@@ -88,7 +88,10 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
         if GroupBuilder:IsInInvitedTable(name) and not GroupBuilder:IsInRaidTable(name) then
             local role = GroupBuilder.invitedTable[name].role;
             GroupBuilder:AddPlayerToRaidTable(name, role);            
-            GroupBuilder:RemovePlayerFromRaidTable(name);
+            
+            -- remove from invited table
+            GroupBuilder.invitedTable[name] = nil;
+
         elseif GroupBuilder:IsInInvitedTable(name) and GroupBuilder:IsInRaidTable(name) then
             GroupBuilder.invitedTable[name] = nil;
         end
