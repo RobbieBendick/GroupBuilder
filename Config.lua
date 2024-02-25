@@ -6,10 +6,24 @@ local Config = GroupBuilder.Config;
 local GBConfig;
 local defaults = {
     profile = {
+        maxHealers = 0,
+        maxDPS = 0,
+        maxTanks = 0,
+        minGearscore = 0,
+        maxRangedDPS = 0,
+        maxMeleeDPS = 0,
+        message = "",
         minimapCoords = {},
         isPaused = true,
+        selectedRaidTemplate = "",
+        selectedRole = "",
+        selectedRaidType = "",
+        selectedSRRaidInfo = "",
+        selectedGDKPRaidInfo = "",
+        selectedAdvertisementRaid = "",
         minPlayersForAdvertisingCount = 15,
         constructMessageIsActive = false,
+        outOfMaxPlayers = 0,
     }
 };
 

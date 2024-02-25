@@ -1,6 +1,19 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local Config = GroupBuilder.Config;
 
+function GroupBuilder:GetClassFromMessage(message)
+    message = message:lower();
+
+    -- Iterate over each class and check if it's mentioned in the message
+    for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
+        if message:find(abbreviation) then
+            return className;
+        end
+    end
+
+    return nil;
+end
+
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     if GroupBuilder.db.profile.isPaused then return end
@@ -27,18 +40,19 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     end
 
     local whispererCharacterName = sender:match("([^%-]+)");
-    local _, whispererClass = UnitClass(whispererCharacterName);
+    local whispererClass = GroupBuilder:GetClassFromMessage(message);
+    if not whispererClass then return GroupBuilder:Print("No class mentioned.") end
 
     -- check maximum of this particular class
     if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder.db.profile[whispererClass.."Maximum"] ~= "" and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
         return self:Print("Too many " .. whispererClass:sub(1,1) .. whispererClass:sub(2):lower() .. "s");
     end
 
-
     if not GroupBuilder.db.profile.maxTotalPlayers then
         return self:Print("Please set the total number of expected players in the Group Requirements options page.");
     end
 
+    -- TODO: gotta refactor this ugly section later...
     -- check if we have room with minimum number of other classes we need in mind
     if GroupBuilder:IsClassNeededForMinimum(whispererClass) then
         if GetNumGroupMembers() + GroupBuilder:FindTotalMinimumOfMissingClasses() - 1 >= GroupBuilder.db.profile.maxTotalPlayers then
@@ -66,6 +80,14 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
             ["role"] = role,
         };
     end)
+
+    local j = 1;
+    if GroupBuilder.raidTable and #GroupBuilder.raidTable > 0 then
+     for unitName, unitData in pairs(GroupBuilder.raidTable) do
+               GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
+               j = j + 1;
+         end
+    end
 
     -- remove them from invited table if invite expires
     local inviteExpirationTime = 122;

@@ -61,7 +61,7 @@ GroupBuilder.classes = {
     "ROGUE",
     "WARRIOR",
     "PRIEST",
-    "MAGE",
+    "MAGE", 
     "PALADIN",
     "HUNTER",
     "DEATHKNIGHT",
@@ -69,6 +69,37 @@ GroupBuilder.classes = {
     "WARLOCK",
     "DRUID"
 };
+
+GroupBuilder.classAbberviations = {
+    ["rogue"] = "ROGUE",
+    ["rog"] = "ROGUE",
+    ["ret"] = "PALADIN",
+    ["hpal"] = "PALADIN",
+    ["warrior"] = "WARRIOR",
+    ["warr"] = "WARRIOR",
+    ["priest"] = "PRIEST",
+    ["pri"] = "PRIEST",
+    ["mage"] = "MAGE",
+    ["mag"] = "MAGE",
+    ["paladin"] = "PALADIN",
+    ["pala"] = "PALADIN",
+    ["pally"] = "PALADIN",
+    ["hunter"] = "HUNTER",
+    ["deathknight"] = "DEATHKNIGHT",
+    ["dk"] = "DEATHKNIGHT",
+    ["shaman"] = "SHAMAN",
+    ["sham"] = "SHAMAN",
+    ["warlock"] = "WARLOCK",
+    ["lock"] = "WARLOCK",
+    ["druid"] = "DRUID",
+    ["dru"] = "DRUID",
+    ["boom"] = "DRUID",
+    ["balance"] = "DRUID",
+    ["ele"] = "SHAMAN",
+    ["enhance"] = "SHAMAN",
+    ["feral"] = "DRUID",
+}
+
 
 GroupBuilder.amountOfRaidBosses = {
     ["Icecrown Citadel"] = 12,
