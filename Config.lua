@@ -739,7 +739,7 @@ function AdvertiseLFG()
     end
     if Config:IsInLookingForGroup() then
         local lookingForGroupChannelID = Config:FindLFGChannelIndex();
-        SendChatMessage(GroupBuilder.db.profile.message, "WHISPER", nil, "Robertdogert");
+        SendChatMessage(GroupBuilder.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
     else
         ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, "LookingForGroup");
         print("Advertisement failed because you're not in the LookingForGroup channel.");

@@ -73,31 +73,47 @@ GroupBuilder.classes = {
 GroupBuilder.classAbberviations = {
     ["rogue"] = "ROGUE",
     ["rog"] = "ROGUE",
-    ["ret"] = "PALADIN",
-    ["hpal"] = "PALADIN",
+
     ["warrior"] = "WARRIOR",
     ["warr"] = "WARRIOR",
+
+    ["disc"] = "PRIEST",
     ["priest"] = "PRIEST",
     ["pri"] = "PRIEST",
+
     ["mage"] = "MAGE",
     ["mag"] = "MAGE",
+
+    ["hunter"] = "HUNTER",
+    
+    ["deathknight"] = "DEATHKNIGHT",
+    ["dk"] = "DEATHKNIGHT",
+    
+    ["warlock"] = "WARLOCK",
+    ["lock"] = "WARLOCK",
+
+    ["shaman"] = "SHAMAN",
+    ["sham"] = "SHAMAN",
+    ["ele"] = "SHAMAN",
+    ["enhance"] = "SHAMAN",
+
+    ["boom"] = "DRUID",
+    ["balance"] = "DRUID",
+    ["feral"] = "DRUID",
+    ["rdruid"] = "DRUID",
+    ["rdru"] = "DRUID",
+    ["dru"] = "DRUID",
+    ["druid"] = "DRUID",
+
+    ["hpal"] = "PALADIN",
+    ["holy pal"] = "PALADIN",
+    ["hpal"] = "PALADIN",
+    ["h pal"] = "PALADIN",
     ["paladin"] = "PALADIN",
     ["pala"] = "PALADIN",
     ["pally"] = "PALADIN",
-    ["hunter"] = "HUNTER",
-    ["deathknight"] = "DEATHKNIGHT",
-    ["dk"] = "DEATHKNIGHT",
-    ["shaman"] = "SHAMAN",
-    ["sham"] = "SHAMAN",
-    ["warlock"] = "WARLOCK",
-    ["lock"] = "WARLOCK",
-    ["druid"] = "DRUID",
-    ["dru"] = "DRUID",
-    ["boom"] = "DRUID",
-    ["balance"] = "DRUID",
-    ["ele"] = "SHAMAN",
-    ["enhance"] = "SHAMAN",
-    ["feral"] = "DRUID",
+    ["ret"] = "PALADIN",
+    ["hpal"] = "PALADIN",
 }
 
 

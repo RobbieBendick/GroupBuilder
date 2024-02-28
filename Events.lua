@@ -1,10 +1,32 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local Config = GroupBuilder.Config;
 
+
+function GroupBuilder:IsInRaidTable(name)
+    return GroupBuilder.raidTable[name] ~= nil;
+end
+
+function GroupBuilder:IsInInvitedTable(name)
+    return GroupBuilder.invitedTable[name] ~= nil;
+end
+
+function GroupBuilder:AddPlayerToRaidTable(name, role)
+    local _, class = UnitClass(name);
+    GroupBuilder.raidTable[name] = {
+        ["class"] = class,
+        ["role"] = role,
+    };
+    print("added " .. name .. " to raidTab as " .. class .. " " .. role);
+end
+
+function GroupBuilder:RemovePlayerFromRaidTable(name)
+    GroupBuilder.raidTable[name] = nil;
+end
+
 function GroupBuilder:GetClassFromMessage(message)
     message = message:lower();
 
-    -- Iterate over each class and check if it's mentioned in the message
+    -- iterate over each class and check if it's mentioned in the message
     for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
         if message:find(abbreviation) then
             return className;
@@ -19,29 +41,47 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if GroupBuilder.db.profile.isPaused then return end
 
     local gearscoreNumber = GroupBuilder:FindGearscore(message);
-    if not gearscoreNumber then return end
-
-    if gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then return end
-
+    if not gearscoreNumber then
+        self:Print("Gearscore not found.");
+        return
+    end
+    
+    if gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
+        self:Print("Player does not meet Gearscore requirement.");
+        return
+    end
     local role = GroupBuilder:FindRole(message);
-    if not role then return end
+    if not role then 
+        self:Print("Role not found.");
+        return
+    end
+
     local maxRoleValues = {
         ["ranged_dps"] = GroupBuilder.db.profile.maxRangedDPS,
         ["melee_dps"] = GroupBuilder.db.profile.maxMeleeDPS,
         ["tank"] = GroupBuilder.db.profile.maxTanks,
         ["healer"] = GroupBuilder.db.profile.maxHealers
     };
+
     for roleName, max in pairs(maxRoleValues) do
         if roleName == "ranged_dps" or roleName == "melee_dps" then
-            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(roleName) >= max then return end
+            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(roleName) >= max then 
+                self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
+                return;
+            end
         else
-            if GroupBuilder:CountPlayersByRole(roleName) >= max then return end
+            if GroupBuilder:CountPlayersByRole(roleName) >= max then 
+                self:Print("Too many " .. roleName .. "s.");
+                return;
+            end
         end
     end
 
     local whispererCharacterName = sender:match("([^%-]+)");
     local whispererClass = GroupBuilder:GetClassFromMessage(message);
-    if not whispererClass then return GroupBuilder:Print("No class mentioned.") end
+    if not whispererClass then
+        return GroupBuilder:Print("No class mentioned.");
+    end
 
     -- check maximum of this particular class
     if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder.db.profile[whispererClass.."Maximum"] ~= "" and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
@@ -51,7 +91,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if not GroupBuilder.db.profile.maxTotalPlayers then
         return self:Print("Please set the total number of expected players in the Group Requirements options page.");
     end
-
     -- TODO: gotta refactor this ugly section later...
     -- check if we have room with minimum number of other classes we need in mind
     if GroupBuilder:IsClassNeededForMinimum(whispererClass) then
@@ -81,14 +120,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         };
     end)
 
-    local j = 1;
-    if GroupBuilder.raidTable and #GroupBuilder.raidTable > 0 then
-     for unitName, unitData in pairs(GroupBuilder.raidTable) do
-               GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
-               j = j + 1;
-         end
-    end
-
     -- remove them from invited table if invite expires
     local inviteExpirationTime = 122;
     C_Timer.After(inviteExpirationTime + maxTimeToInvite, function ()
@@ -107,16 +138,24 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
 
     for i = 1, GetNumGroupMembers() do
         local name = GetRaidRosterInfo(i);
+	
         if GroupBuilder:IsInInvitedTable(name) and not GroupBuilder:IsInRaidTable(name) then
             local role = GroupBuilder.invitedTable[name].role;
-            GroupBuilder:AddPlayerToRaidTable(name, role);            
-            
+            GroupBuilder:AddPlayerToRaidTable(name, role);  
+
             -- remove from invited table
             GroupBuilder.invitedTable[name] = nil;
 
         elseif GroupBuilder:IsInInvitedTable(name) and GroupBuilder:IsInRaidTable(name) then
-            GroupBuilder.invitedTable[name] = nil;
+            GroupBuilder.invitedTable[name] = nil;  
         end
+    end
+       local j = 1;
+    if GroupBuilder.raidTable and #GroupBuilder.raidTable > 0 then
+     for unitName, unitData in pairs(GroupBuilder.raidTable) do
+               GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
+               j = j + 1;
+         end
     end
 end
 
