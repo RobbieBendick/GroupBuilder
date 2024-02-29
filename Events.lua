@@ -3,10 +3,12 @@ local Config = GroupBuilder.Config;
 
 
 function GroupBuilder:IsInRaidTable(name)
+    if not GroupBuilder.db.profile.raidTable then return nil end
     return GroupBuilder.db.profile.raidTable[name] ~= nil;
 end
 
 function GroupBuilder:IsInInvitedTable(name)
+    if not GroupBuilder.db.profile.invitedTable then return nil end
     return GroupBuilder.db.profile.invitedTable[name] ~= nil;
 end
 
@@ -48,8 +50,8 @@ function GroupBuilder:IncrementCharacterInteractedWith(characterName)
 end
 
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
-
     if GroupBuilder.db.profile.isPaused then return end
+
     local whispererCharacterName = sender:match("([^%-]+)");
     if GroupBuilder:IsInRaidTable(whispererCharacterName) then
         -- don't want to message or invite people who are already in the group.
@@ -59,8 +61,10 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     -- if whispererCharacterName == UnitName("player") then
     --     return self:Print("Cannot invite yourself.");
     -- end
-
-    local previousWhispersData = GroupBuilder.db.profile.inviteConstruction[whispererCharacterName];
+    local previousWhispersData;
+    if GroupBuilder.db.profile.inviteConstruction then
+        previousWhispersData = GroupBuilder.db.profile.inviteConstruction[whispererCharacterName];
+    end
 
     local whispererClass = GroupBuilder:GetClassFromMessage(message);
     local maxRoleValues = {
@@ -98,6 +102,11 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end
     end
 
+    if GroupBuilder.db.profile.minGearscore and gearscoreNumber and gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
+        self:Print("Player does not meet Gearscore requirement.");
+    end
+
+
     -- check what is missing: (gs, class, role)
     local onlyRoleIsMissing = not role and whispererClass and gearscoreNumber;
     local onlyClassIsMissing = not whispererClass and role and gearscoreNumber;
@@ -115,6 +124,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName] = {};
     end
 
+   
     if onlyRoleIsMissing then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
@@ -183,12 +193,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     end
-
-
-    if gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
-        self:Print("Player does not meet Gearscore requirement.");
-    end
-
     -- check maximum of this particular class
     if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder.db.profile[whispererClass.."Maximum"] ~= "" and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
         return self:Print("Too many " .. whispererClass:sub(1, 1) .. whispererClass:sub(2):lower() .. "s");
@@ -218,7 +222,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
             end
         else
             if GroupBuilder:CountPlayersByRole(roleName) >= max then 
-                self:Print("Too many " .. roleName .. "s.");
+                self:Print("Too many " .. roleName .. "s");
                 return;
             end
         end
@@ -226,7 +230,8 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     -- check max role and class (ex: only 1 healer paladin)
     if GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= nil and GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= "" and GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass) >= tonumber(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]) then
-        return self:Print("Too many " .. role:gsub("_", " ") ..  " " .. whispererClass:lower() .. "s");
+        print("GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass): ", GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass))
+        return self:Print("Too many " .. role:gsub("_", " ") ..  " " .. whispererClass:lower() .. "s, " .. "max is " .. tostring(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]));
     end
 
 
@@ -298,9 +303,44 @@ function GroupBuilder:HandleErrorMessages(event, msg)
     GroupBuilder.db.profile.invitedTable[playerName] = nil;
 end
 
+
+local defaults = {
+    profile = {
+        maxHealers = 0,
+        maxDPS = 0,
+        maxTanks = 0,
+        minGearscore = 0,
+        maxRangedDPS = 0,
+        maxMeleeDPS = 0,
+        message = "",
+        minimapCoords = {},
+        raidTable = {},
+        invitedTable = {},
+        inviteConstruction = {},
+        isPaused = true,
+        selectedRaidTemplate = "",
+        selectedRole = "",
+        selectedRaidType = "",
+        selectedSRRaidInfo = "",
+        selectedGDKPRaidInfo = "",
+        selectedAdvertisementRaid = "",
+        minPlayersForAdvertisingCount = 15,
+        constructMessageIsActive = false,
+        outOfMaxPlayers = 0,
+    }
+};
+
 function GroupBuilder:OnInitialize()
     -- initialize saved variables with defaults
     GroupBuilder.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
+
+    C_Timer.After(1, function ()
+        if GetNumGroupMembers() == 0 then
+            GroupBuilder.db.profile.raidTable = {};
+            GroupBuilder.db.profile.invitedTable = {};
+            GroupBuilder.db.profile.inviteConstruction = {};
+        end 
+    end);
     
     -- handle events
     self:RegisterEvent("CHAT_MSG_WHISPER", "HandleWhispers");

@@ -4,32 +4,7 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 GroupBuilder.Config = {};
 local Config = GroupBuilder.Config;
 local GBConfig;
-local defaults = {
-    profile = {
-        maxHealers = 0,
-        maxDPS = 0,
-        maxTanks = 0,
-        minGearscore = 0,
-        maxRangedDPS = 0,
-        maxMeleeDPS = 0,
-        message = "",
-        minimapCoords = {},
-        raidTable = {},
-        invitedTable = {},
-        inviteConstruction = {},
-        isPaused = true,
-        selectedRaidTemplate = "",
-        selectedRole = "",
-        selectedRaidType = "",
-        selectedSRRaidInfo = "",
-        selectedGDKPRaidInfo = "",
-        selectedAdvertisementRaid = "",
-        minPlayersForAdvertisingCount = 15,
-        constructMessageIsActive = false,
-        outOfMaxPlayers = 0,
-    }
-};
-
+local _, playerClass = UnitClass("player");
 local raidInstanceDropdownValues = {
     ["Icecrown Citadel 25"] = "Icecrown Citadel 25",
     ["Icecrown Citadel 10"] = "Icecrown Citadel 10",
@@ -94,11 +69,13 @@ function GroupBuilder:CountPlayersByRoleAndClass(role, class)
     local count = 0;
     for characterName, characterData in pairs(GroupBuilder.db.profile.raidTable) do
         if characterData.role == role and characterData.class == class then
+            print("char name: ", characterName)
             count = count + 1;
         end
     end
     for characterName, characterData in pairs(GroupBuilder.db.profile.invitedTable) do
         if characterData.role == role and characterData.class == class then
+            print("char name: ", characterName)
             count = count + 1;
         end
     end

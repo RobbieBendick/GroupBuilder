@@ -189,6 +189,9 @@ GroupBuilder.raidInstanceDropdownAcronyms = {
     ["RS 10"] = "Ruby Sanctum 10",
 };
 
+
+
+
 function GroupBuilder:Contains(list, value)
     for _, v in ipairs(list) do
         if v == value then
