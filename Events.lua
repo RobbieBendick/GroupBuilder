@@ -59,9 +59,9 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         return
     end 
 
-    if whispererCharacterName == UnitName("player") then
-        return self:Print("Cannot invite yourself.");
-    end
+    -- if whispererCharacterName == UnitName("player") then
+    --     return self:Print("Cannot invite yourself.");
+    -- end
 
     local previousWhispersData;
     if GroupBuilder.db.profile.inviteConstruction then

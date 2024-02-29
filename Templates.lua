@@ -2,13 +2,13 @@ local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 function GroupBuilder:ResetTemplate()
-    GroupBuilder.db.profile.maxDPS = 0;
-    GroupBuilder.db.profile.maxTanks = 0;
-    GroupBuilder.db.profile.maxHealers = 0;
-    GroupBuilder.db.profile.maxRangedDPS = 0;
-    GroupBuilder.db.profile.maxMeleeDPS = 0;
-    GroupBuilder.db.profile.minGearscore = 0;
-    GroupBuilder.db.profile.maxTotalPlayers = 0;
+    GroupBuilder.db.profile.maxDPS = "";
+    GroupBuilder.db.profile.maxTanks = "";
+    GroupBuilder.db.profile.maxHealers = "";
+    GroupBuilder.db.profile.maxRangedDPS = "";
+    GroupBuilder.db.profile.maxMeleeDPS = "";
+    GroupBuilder.db.profile.minGearscore = "";
+    GroupBuilder.db.profile.maxTotalPlayers = "";
 
     for roleName in pairs(GroupBuilder.roles) do
         for i, class in ipairs(GroupBuilder.classes) do
