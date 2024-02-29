@@ -36,26 +36,24 @@ function GroupBuilder:GetClassFromMessage(message)
     return nil;
 end
 
+function GroupBuilder:IncrementCharacterInteractedWith(characterName)
+    if GroupBuilder.recentlyInteractedWith[characterName] then
+        GroupBuilder.recentlyInteractedWith[characterName] = GroupBuilder.recentlyInteractedWith[characterName] + 1;
+    else
+        GroupBuilder.recentlyInteractedWith[characterName] = 1;
+    end
+end
+
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     if GroupBuilder.db.profile.isPaused then return end
+    local whispererCharacterName = sender:match("([^%-]+)");
+    -- if whispererCharacterName == UnitName("player") then
+    --     return self:Print("Cannot invite yourself.");
+    -- end
+    local previousWhispersData = GroupBuilder.inviteConstruction[whispererCharacterName];
 
-    local gearscoreNumber = GroupBuilder:FindGearscore(message);
-    if not gearscoreNumber then
-        self:Print("Gearscore not found.");
-        return
-    end
-    
-    if gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
-        self:Print("Player does not meet Gearscore requirement.");
-        return
-    end
-    local role = GroupBuilder:FindRole(message);
-    if not role then 
-        self:Print("Role not found.");
-        return
-    end
-
+    local whispererClass = GroupBuilder:GetClassFromMessage(message);
     local maxRoleValues = {
         ["ranged_dps"] = GroupBuilder.db.profile.maxRangedDPS,
         ["melee_dps"] = GroupBuilder.db.profile.maxMeleeDPS,
@@ -63,29 +61,129 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         ["healer"] = GroupBuilder.db.profile.maxHealers
     };
 
-    for roleName, max in pairs(maxRoleValues) do
-        if roleName == "ranged_dps" or roleName == "melee_dps" then
-            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(roleName) >= max then 
-                self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
-                return;
-            end
+
+
+    local gearscoreNumber = GroupBuilder:FindGearscore(message);
+    if not gearscoreNumber then
+        if previousWhispersData and previousWhispersData.gearscore then
+            gearscoreNumber = previousWhispersData.gearscore;
         else
-            if GroupBuilder:CountPlayersByRole(roleName) >= max then 
-                self:Print("Too many " .. roleName .. "s.");
-                return;
-            end
+            self:Print("Gearscore not found.");
         end
     end
 
-    local whispererCharacterName = sender:match("([^%-]+)");
-    local whispererClass = GroupBuilder:GetClassFromMessage(message);
-    if not whispererClass then
-        return GroupBuilder:Print("No class mentioned.");
+    
+    local role = GroupBuilder:FindRole(message);
+    if not role then
+        if previousWhispersData and previousWhispersData.role then
+            role = previousWhispersData.role;
+        else
+            self:Print("Role not found.");
+        end
+    end
+
+    if previousWhispersData and not whispererClass then
+        if previousWhispersData.class then
+            whispererClass = previousWhispersData.class
+        else
+            self:Print("No class mentioned.");
+        end
+    end
+
+    -- check what is missing: (gs, class, role)
+    local onlyRoleIsMissing = not role and whispererClass and gearscoreNumber;
+    local onlyClassIsMissing = not whispererClass and role and gearscoreNumber;
+    local onlyGSIsMissing = not gearscoreNumber and whispererClass and role;
+    
+    local onlyHaveGS = not whispererClass and not role and gearscoreNumber;
+    local onlyHaveClass = not gearscoreNumber and not role and whispererClass;
+    local onlyHaveRole = not gearscoreNumber and not whispererClass and role;
+
+    local allMissing = not whispererClass and not gearscoreNumber and not role;
+
+    local amountOfInteractionsBeforeStopping = 1;
+
+    if not GroupBuilder.inviteConstruction[whispererCharacterName] then
+        GroupBuilder.inviteConstruction[whispererCharacterName] = {};
+    end
+
+    if onlyRoleIsMissing then
+        GroupBuilder.inviteConstruction[whispererCharacterName].class = whispererClass;
+        GroupBuilder.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
+
+        if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
+            return
+        end
+
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("spec?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    elseif onlyClassIsMissing then
+        GroupBuilder.inviteConstruction[whispererCharacterName].role = role;
+        GroupBuilder.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
+        if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
+            return
+        end
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("class?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    elseif onlyGSIsMissing then
+        GroupBuilder.inviteConstruction[whispererCharacterName].class = whispererClass;
+        GroupBuilder.inviteConstruction[whispererCharacterName].role = role;
+        if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
+            return
+        end
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("gs?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    elseif onlyHaveGS then
+        GroupBuilder.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
+        if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
+            return
+        end
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("spec & class?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    elseif onlyHaveClass then
+        GroupBuilder.inviteConstruction[whispererCharacterName].class = whispererClass;
+        if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
+            return
+        end
+
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("spec & gs?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    elseif onlyHaveRole then
+        GroupBuilder.inviteConstruction[whispererCharacterName].role = role;
+
+        if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
+            return
+        end
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("spec & gs?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    end
+
+
+    if gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
+        self:Print("Player does not meet Gearscore requirement.");
     end
 
     -- check maximum of this particular class
     if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder.db.profile[whispererClass.."Maximum"] ~= "" and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
-        return self:Print("Too many " .. whispererClass:sub(1,1) .. whispererClass:sub(2):lower() .. "s");
+        return self:Print("Too many " .. whispererClass:sub(1, 1) .. whispererClass:sub(2):lower() .. "s");
     end
 
     if not GroupBuilder.db.profile.maxTotalPlayers then
@@ -103,26 +201,44 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end
     end
 
+    -- check role compatibility with group
+    for roleName, max in pairs(maxRoleValues) do
+        if roleName == "ranged_dps" or roleName == "melee_dps" then
+            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(roleName) >= max then 
+                self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
+                return;
+            end
+        else
+            if GroupBuilder:CountPlayersByRole(roleName) >= max then 
+                self:Print("Too many " .. roleName .. "s.");
+                return;
+            end
+        end
+    end
+
     -- check max role and class (ex: only 1 healer paladin)
     if GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= nil and GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= "" and GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass) >= tonumber(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]) then
         return self:Print("Too many " .. role:gsub("_", " ") ..  " " .. whispererClass:lower() .. "s");
     end
 
+
     -- invite them
-    local minTimeToInvite, maxTimeToInvite = 4, 10;
-    C_Timer.After(math.random(minTimeToInvite, maxTimeToInvite), function ()
+    C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
         GroupBuilder:Print('inviting', whispererCharacterName);
         InviteUnit(whispererCharacterName);
 
         GroupBuilder.invitedTable[whispererCharacterName] = {
             ["class"] = whispererClass,
             ["role"] = role,
+            ["gearscore"] = gearscoreNumber,
         };
+
+        GroupBuilder.inviteConstruction[whispererCharacterName] = nil;
     end)
 
     -- remove them from invited table if invite expires
     local inviteExpirationTime = 122;
-    C_Timer.After(inviteExpirationTime + maxTimeToInvite, function ()
+    C_Timer.After(inviteExpirationTime + GroupBuilder.maxDelayTime, function ()
         if not GroupBuilder:IsInRaidTable(whispererCharacterName) and GroupBuilder:IsInInvitedTable(whispererCharacterName) then
             GroupBuilder.invitedTable[whispererCharacterName] = nil;
         end
@@ -150,12 +266,12 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
             GroupBuilder.invitedTable[name] = nil;  
         end
     end
-       local j = 1;
+    local j = 1;
     if GroupBuilder.raidTable and #GroupBuilder.raidTable > 0 then
-     for unitName, unitData in pairs(GroupBuilder.raidTable) do
-               GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
-               j = j + 1;
-         end
+        for unitName, unitData in pairs(GroupBuilder.raidTable) do
+            GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
+            j = j + 1;
+        end
     end
 end
 

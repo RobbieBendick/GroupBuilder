@@ -18,10 +18,8 @@ function GroupBuilder:FindRole(message)
 end
 
 function GroupBuilder:FindGearscore(message)
-    local keywordPatternWithGearscoreRole = "(%d*%.?%d+)%s*(%a+)";
-
+    local keywordPatternWithGearscoreRole = "(%d*%.?%d+)";
     local gearscoreNumber;
-
     -- check for pattern with number followed by a role
     for number, role in message:lower():gmatch(keywordPatternWithGearscoreRole) do
         gearscoreNumber = tonumber(number);
@@ -29,7 +27,6 @@ function GroupBuilder:FindGearscore(message)
             gearscoreNumber = gearscoreNumber * 1000;
         end
         -- multiply the number by 1000 to interpret decimals as thousands
-        print('Gearscore: ', gearscoreNumber);
         break;
     end
 

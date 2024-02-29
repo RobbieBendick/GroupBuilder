@@ -2,6 +2,10 @@ local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon("GroupBuilder", "AceCon
 GroupBuilder.addonName = "GroupBuilder";
 GroupBuilder.raidTable = {};
 GroupBuilder.invitedTable = {};
+GroupBuilder.inviteConstruction = {};
+GroupBuilder.recentlyInteractedWith = {};
+GroupBuilder.minDelayTime = 4;
+GroupBuilder.maxDelayTime = 10;
 GroupBuilder.roles = {
     ["healer"] = {
         "resto",
@@ -19,10 +23,8 @@ GroupBuilder.roles = {
         "prot",
         "protection",
         "tank",
-        "frost dk",
-        "blood dk",
-        "frost deathknight",
-        "blood deathknight",
+        "frost d",
+        "blood",
     },
     ["melee_dps"] = {
         "rogue",
@@ -71,11 +73,11 @@ GroupBuilder.classes = {
 };
 
 GroupBuilder.classAbberviations = {
-    ["rogue"] = "ROGUE",
+    ["roeg"] = "ROGUE",
     ["rog"] = "ROGUE",
 
     ["warrior"] = "WARRIOR",
-    ["warr"] = "WARRIOR",
+    ["war"] = "WARRIOR",
 
     ["disc"] = "PRIEST",
     ["priest"] = "PRIEST",
@@ -85,8 +87,10 @@ GroupBuilder.classAbberviations = {
     ["mag"] = "MAGE",
 
     ["hunter"] = "HUNTER",
+    ["hunt"] = "HUNTER",
     
-    ["deathknight"] = "DEATHKNIGHT",
+    ["death"] = "DEATHKNIGHT",
+    ["deaht"] = "DEATHKNIGHT",
     ["dk"] = "DEATHKNIGHT",
     
     ["warlock"] = "WARLOCK",
@@ -95,7 +99,8 @@ GroupBuilder.classAbberviations = {
     ["shaman"] = "SHAMAN",
     ["sham"] = "SHAMAN",
     ["ele"] = "SHAMAN",
-    ["enhance"] = "SHAMAN",
+    ["enh"] = "SHAMAN",
+
 
     ["boom"] = "DRUID",
     ["balance"] = "DRUID",
@@ -104,18 +109,18 @@ GroupBuilder.classAbberviations = {
     ["rdru"] = "DRUID",
     ["dru"] = "DRUID",
     ["druid"] = "DRUID",
+    ["moon"] = "DRUID",
 
     ["hpal"] = "PALADIN",
-    ["holy pal"] = "PALADIN",
+    ["holy pa"] = "PALADIN",
     ["hpal"] = "PALADIN",
     ["h pal"] = "PALADIN",
-    ["paladin"] = "PALADIN",
     ["pala"] = "PALADIN",
     ["pally"] = "PALADIN",
     ["ret"] = "PALADIN",
-    ["hpal"] = "PALADIN",
+    ["rpal"] = "PALADIN",
+    ["r pal"] = "PALADIN",
 }
-
 
 GroupBuilder.amountOfRaidBosses = {
     ["Icecrown Citadel"] = 12,
@@ -152,7 +157,7 @@ GroupBuilder.roleClasses = {
     },
     ["ranged_dps"] = {
         "HUNTER",
-        "Warlock",
+        "WARLOCK",
         "MAGE",
         "SHAMAN",
         "PRIEST",
