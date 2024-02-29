@@ -1,8 +1,5 @@
 local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon("GroupBuilder", "AceConsole-3.0", "AceEvent-3.0");
 GroupBuilder.addonName = "GroupBuilder";
-GroupBuilder.raidTable = {};
-GroupBuilder.invitedTable = {};
-GroupBuilder.inviteConstruction = {};
 GroupBuilder.recentlyInteractedWith = {};
 GroupBuilder.minDelayTime = 4;
 GroupBuilder.maxDelayTime = 10;
@@ -10,13 +7,21 @@ GroupBuilder.roles = {
     ["healer"] = {
         "resto",
         "rsham",
+        "resto sh",
+
+        "rdrru",
+        "rdruu",
         "rdruid",
         "rdru",
+
+        "dics",
         "disc",
+
         "hpal",
-        "holy pal",
+        "holy pa",
         "hpal",
         "h pal",
+        "tree",
     },
     ["tank"] = {
         "prot pal",
@@ -29,30 +34,45 @@ GroupBuilder.roles = {
     ["melee_dps"] = {
         "rogue",
         "rog",
+
         "feral",
+
         "enh",
-        "war",
         "enhancement",
         "enhance",
-        "fury warr",
-        "dps warr",
-        "warr dps",
-        "fwar",
+    
         "ret",
-        "retribution",
+        "retr",
+
         "warrior",
+        "war",
+        "fwar",
+        "warr dps",
+        "fury war",
+        "dps war",
+
+        "unh",
+        "dk",
+        "death",
+        "deaht",
     },
     ["ranged_dps"] = {
         "hunter",
         "hunt",
+
         "mage",
+        "mag",
+
         "ele shaman",
         "elesham",
         "ele sham",
+
         "warlock",
         "lock",
+
         "spriest",
         "shadow",
+
         "boom",
         "moon",
         "balance",
@@ -92,7 +112,10 @@ GroupBuilder.classAbberviations = {
     ["death"] = "DEATHKNIGHT",
     ["deaht"] = "DEATHKNIGHT",
     ["dk"] = "DEATHKNIGHT",
-    
+    ["unh"] = "DEATHKNIGHT",
+    ["frost"] = "DEATHKNIGHT",
+    ["frots"] = "DEATHKNIGHT",
+
     ["warlock"] = "WARLOCK",
     ["lock"] = "WARLOCK",
 
@@ -110,6 +133,7 @@ GroupBuilder.classAbberviations = {
     ["dru"] = "DRUID",
     ["druid"] = "DRUID",
     ["moon"] = "DRUID",
+    ["tree"] = "DRUID",
 
     ["hpal"] = "PALADIN",
     ["holy pa"] = "PALADIN",

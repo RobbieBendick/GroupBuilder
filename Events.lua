@@ -3,30 +3,33 @@ local Config = GroupBuilder.Config;
 
 
 function GroupBuilder:IsInRaidTable(name)
-    return GroupBuilder.raidTable[name] ~= nil;
+    return GroupBuilder.db.profile.raidTable[name] ~= nil;
 end
 
 function GroupBuilder:IsInInvitedTable(name)
-    return GroupBuilder.invitedTable[name] ~= nil;
+    return GroupBuilder.db.profile.invitedTable[name] ~= nil;
 end
 
-function GroupBuilder:AddPlayerToRaidTable(name, role)
+function GroupBuilder:AddPlayerToRaidTable(name, role, gearscore)
     local _, class = UnitClass(name);
-    GroupBuilder.raidTable[name] = {
+    local playerInfo = {
         ["class"] = class,
         ["role"] = role,
-    };
-    print("added " .. name .. " to raidTab as " .. class .. " " .. role);
+    }
+    if gearscore then
+        playerInfo["gearscore"] = gearscore;
+    end
+    GroupBuilder.db.profile.raidTable[name] = playerInfo;
+    print(("Added %s to raidTab as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"))
 end
 
 function GroupBuilder:RemovePlayerFromRaidTable(name)
-    GroupBuilder.raidTable[name] = nil;
+    GroupBuilder.db.profile.raidTable[name] = nil;
 end
 
 function GroupBuilder:GetClassFromMessage(message)
     message = message:lower();
 
-    -- iterate over each class and check if it's mentioned in the message
     for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
         if message:find(abbreviation) then
             return className;
@@ -48,10 +51,16 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     if GroupBuilder.db.profile.isPaused then return end
     local whispererCharacterName = sender:match("([^%-]+)");
+    if GroupBuilder:IsInRaidTable(whispererCharacterName) then
+        -- don't want to message or invite people who are already in the group.
+        return
+    end 
+
     -- if whispererCharacterName == UnitName("player") then
     --     return self:Print("Cannot invite yourself.");
     -- end
-    local previousWhispersData = GroupBuilder.inviteConstruction[whispererCharacterName];
+
+    local previousWhispersData = GroupBuilder.db.profile.inviteConstruction[whispererCharacterName];
 
     local whispererClass = GroupBuilder:GetClassFromMessage(message);
     local maxRoleValues = {
@@ -72,7 +81,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end
     end
 
-    
     local role = GroupBuilder:FindRole(message);
     if not role then
         if previousWhispersData and previousWhispersData.role then
@@ -103,13 +111,13 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     local amountOfInteractionsBeforeStopping = 1;
 
-    if not GroupBuilder.inviteConstruction[whispererCharacterName] then
-        GroupBuilder.inviteConstruction[whispererCharacterName] = {};
+    if not GroupBuilder.db.profile.inviteConstruction[whispererCharacterName] then
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName] = {};
     end
 
     if onlyRoleIsMissing then
-        GroupBuilder.inviteConstruction[whispererCharacterName].class = whispererClass;
-        GroupBuilder.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
 
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
             return
@@ -121,8 +129,8 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     elseif onlyClassIsMissing then
-        GroupBuilder.inviteConstruction[whispererCharacterName].role = role;
-        GroupBuilder.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
             return
         end
@@ -132,8 +140,8 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     elseif onlyGSIsMissing then
-        GroupBuilder.inviteConstruction[whispererCharacterName].class = whispererClass;
-        GroupBuilder.inviteConstruction[whispererCharacterName].role = role;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
             return
         end
@@ -143,7 +151,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     elseif onlyHaveGS then
-        GroupBuilder.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
             return
         end
@@ -153,7 +161,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     elseif onlyHaveClass then
-        GroupBuilder.inviteConstruction[whispererCharacterName].class = whispererClass;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
             return
         end
@@ -164,7 +172,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     elseif onlyHaveRole then
-        GroupBuilder.inviteConstruction[whispererCharacterName].role = role;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
 
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
             return
@@ -227,20 +235,20 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         GroupBuilder:Print('inviting', whispererCharacterName);
         InviteUnit(whispererCharacterName);
 
-        GroupBuilder.invitedTable[whispererCharacterName] = {
+        GroupBuilder.db.profile.invitedTable[whispererCharacterName] = {
             ["class"] = whispererClass,
             ["role"] = role,
             ["gearscore"] = gearscoreNumber,
         };
 
-        GroupBuilder.inviteConstruction[whispererCharacterName] = nil;
+        GroupBuilder.db.profile.inviteConstruction[whispererCharacterName] = nil;
     end)
 
     -- remove them from invited table if invite expires
     local inviteExpirationTime = 122;
     C_Timer.After(inviteExpirationTime + GroupBuilder.maxDelayTime, function ()
         if not GroupBuilder:IsInRaidTable(whispererCharacterName) and GroupBuilder:IsInInvitedTable(whispererCharacterName) then
-            GroupBuilder.invitedTable[whispererCharacterName] = nil;
+            GroupBuilder.db.profile.invitedTable[whispererCharacterName] = nil;
         end
     end);
 end
@@ -252,23 +260,32 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
         GroupBuilder:AddPlayerToRaidTable(playerName, GroupBuilder.db.profile.selectedRole);
     end
 
+    if GetNumGroupMembers() == 0 then
+        GroupBuilder.db.profile.raidTable = {};
+        GroupBuilder.db.profile.invitedTable = {};
+        GroupBuilder.db.profile.inviteConstruction = {};
+    end
+
     for i = 1, GetNumGroupMembers() do
         local name = GetRaidRosterInfo(i);
 	
         if GroupBuilder:IsInInvitedTable(name) and not GroupBuilder:IsInRaidTable(name) then
-            local role = GroupBuilder.invitedTable[name].role;
-            GroupBuilder:AddPlayerToRaidTable(name, role);  
+            local role = GroupBuilder.db.profile.invitedTable[name].role;
+            local gs = GroupBuilder.db.profile.invitedTable[name].gearscore;
+            GroupBuilder:AddPlayerToRaidTable(name, role, gs);  
 
             -- remove from invited table
-            GroupBuilder.invitedTable[name] = nil;
+            GroupBuilder.db.profile.invitedTable[name] = nil;
+            GroupBuilder.db.profile.inviteConstruction[name] = nil;
 
         elseif GroupBuilder:IsInInvitedTable(name) and GroupBuilder:IsInRaidTable(name) then
-            GroupBuilder.invitedTable[name] = nil;  
+            GroupBuilder.db.profile.invitedTable[name] = nil;
+            GroupBuilder.db.profile.inviteConstruction[name] = nil;
         end
     end
     local j = 1;
-    if GroupBuilder.raidTable and #GroupBuilder.raidTable > 0 then
-        for unitName, unitData in pairs(GroupBuilder.raidTable) do
+    if GroupBuilder.db.profile.raidTable and #GroupBuilder.db.profile.raidTable > 0 then
+        for unitName, unitData in pairs(GroupBuilder.db.profile.raidTable) do
             GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
             j = j + 1;
         end
@@ -278,7 +295,7 @@ end
 function GroupBuilder:HandleErrorMessages(event, msg)
     if not msg:find("is already in a group") then return end
     local playerName = msg:match("(%S+)");
-    GroupBuilder.invitedTable[playerName] = nil;
+    GroupBuilder.db.profile.invitedTable[playerName] = nil;
 end
 
 function GroupBuilder:OnInitialize()

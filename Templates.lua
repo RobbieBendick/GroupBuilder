@@ -9,6 +9,13 @@ function GroupBuilder:NoneTemplate()
     GroupBuilder.db.profile.maxMeleeDPS = 0;
     GroupBuilder.db.profile.minGearscore = 0;
     GroupBuilder.db.profile.maxTotalPlayers = 0;
+
+    GroupBuilder.db.profile["healerPRIESTMaximum"] = "";
+    GroupBuilder.db.profile["healerSHAMANMaximum"] = "";
+    GroupBuilder.db.profile["healerPALADINMaximum"] = "";
+    GroupBuilder.db.profile["healerDRUIDMaximum"] = "";
+
+    GroupBuilder.db.profile["tankDRUIDMaximum"] = "";
 end
 
 function GroupBuilder:CheckForPlayerRole()
@@ -35,6 +42,13 @@ function GroupBuilder:IcecrownCitadel25Template()
     GroupBuilder.db.profile.maxMeleeDPS = 10;
     GroupBuilder.db.profile.minGearscore = 5600;
     GroupBuilder.db.profile.maxTotalPlayers = 25;
+    GroupBuilder.db.profile["healerPRIESTMaximum"] = 1;
+    GroupBuilder.db.profile["healerSHAMANMaximum"] = 2;
+    GroupBuilder.db.profile["healerPALADINMaximum"] = 2;
+    GroupBuilder.db.profile["healerDRUIDMaximum"] = 2;
+
+    GroupBuilder.db.profile["tankDRUIDMaximum"] = 1;
+
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end

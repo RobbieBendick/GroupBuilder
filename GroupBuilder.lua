@@ -24,13 +24,11 @@ function GroupBuilder:FindGearscore(message)
     for number, role in message:lower():gmatch(keywordPatternWithGearscoreRole) do
         gearscoreNumber = tonumber(number);
         if gearscoreNumber < 1000 then
+            -- multiply the number by 1000 to interpret decimals as thousands
             gearscoreNumber = gearscoreNumber * 1000;
         end
-        -- multiply the number by 1000 to interpret decimals as thousands
         break;
     end
 
     return gearscoreNumber;
 end
-
-

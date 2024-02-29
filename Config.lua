@@ -14,6 +14,9 @@ local defaults = {
         maxMeleeDPS = 0,
         message = "",
         minimapCoords = {},
+        raidTable = {},
+        invitedTable = {},
+        inviteConstruction = {},
         isPaused = true,
         selectedRaidTemplate = "",
         selectedRole = "",
@@ -52,12 +55,12 @@ end
 function GroupBuilder:FindClassCount(class)
     if not class then return end
     local count = 0;
-    for characterName, characterData in pairs(GroupBuilder.raidTable) do
+    for characterName, characterData in pairs(GroupBuilder.db.profile.raidTable) do
         if characterData.class == class then
             count = count + 1;
         end
     end
-    for characterName, characterData in pairs(GroupBuilder.invitedTable) do
+    for characterName, characterData in pairs(GroupBuilder.db.profile.invitedTable) do
         if characterData.class == class then
             count = count + 1;
         end
@@ -69,13 +72,13 @@ end
 function GroupBuilder:CountPlayersByRole(table, role)
     local count = 0;
     if role == "dps" then
-        for _, playerData in pairs(GroupBuilder.raidTable) do
+        for _, playerData in pairs(GroupBuilder.db.profile.raidTable) do
             if playerData.role == "melee_dps" or playerData.role == "ranged_dps" then
                 count = count + 1;
             end
         end
     else
-        for _, playerData in pairs(GroupBuilder.raidTable) do
+        for _, playerData in pairs(GroupBuilder.db.profile.raidTable) do
             if playerData.role == role then
                 count = count + 1;
             end
@@ -87,12 +90,12 @@ end
 function GroupBuilder:CountPlayersByRoleAndClass(role, class)
     if not role or not class then return end
     local count = 0;
-    for characterName, characterData in pairs(GroupBuilder.raidTable) do
+    for characterName, characterData in pairs(GroupBuilder.db.profile.raidTable) do
         if characterData.role == role and characterData.class == class then
             count = count + 1;
         end
     end
-    for characterName, characterData in pairs(GroupBuilder.invitedTable) do
+    for characterName, characterData in pairs(GroupBuilder.db.profile.invitedTable) do
         if characterData.role == role and characterData.class == class then
             count = count + 1;
         end
@@ -121,21 +124,6 @@ function Config:GenerateClassTabs()
             type = "group",
             name = className:sub(1, 1) .. className:sub(2):lower(),
             args = {
-                [className .. "Minimum"] = {
-                    order = 1,
-                    type = "input",
-                    name = "Minimum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s",
-                    desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If minimum is 3, the group won't fill until it reaches 3 Rogues)",
-                    width = "normal",
-                    set = function(info, value)
-                        local fullName = className .. "Minimum";
-                        GroupBuilder.db.profile[fullName] = value;
-                    end,
-                    get = function(info)
-                        local fullName = className .. "Minimum";
-                        return GroupBuilder.db.profile[fullName];
-                    end,
-                },
                 [className .. "Maximum"] = {
                     order = 1,
                     type = "input",
@@ -143,12 +131,27 @@ function Config:GenerateClassTabs()
                     desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If maximum is 0, the group won't fill that class)",
                     width = "normal",
                     set = function(info, value)
-                        local fullName = className .. "Maximum";
-                        GroupBuilder.db.profile[fullName] = value;
+                        local classMax = className .. "Maximum";
+                        GroupBuilder.db.profile[classMax] = value;
                     end,
                     get = function(info)
-                        local fullName = className .. "Maximum";
-                        return GroupBuilder.db.profile[fullName];
+                        local classMax = className .. "Maximum";
+                        return GroupBuilder.db.profile[classMax];
+                    end,
+                },
+                [className .. "Minimum"] = {
+                    order = 2,
+                    type = "input",
+                    name = "Minimum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s",
+                    desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If minimum is 3, the group won't fill until it reaches 3 Rogues)",
+                    width = "normal",
+                    set = function(info, value)
+                        local classMin = className .. "Minimum";
+                        GroupBuilder.db.profile[classMin] = value;
+                    end,
+                    get = function(info)
+                        local classMin = className .. "Minimum";
+                        return GroupBuilder.db.profile[classMin];
                     end,
                 },
             },
