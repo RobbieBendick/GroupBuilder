@@ -120,7 +120,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName] = {};
     end
 
-   
     if onlyRoleIsMissing then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
@@ -239,8 +238,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         return self:Print("Too many " .. role:gsub("_", " ") ..  " " .. whispererClass:lower() .. "s, " .. "max is " .. tostring(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]));
     end
 
-
-    -- invite them
+    -- everything is good, invite them
     C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
         GroupBuilder:Print('inviting', whispererCharacterName);
         InviteUnit(whispererCharacterName);
@@ -274,6 +272,16 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
         GroupBuilder.db.profile.raidTable = {};
         GroupBuilder.db.profile.invitedTable = {};
         GroupBuilder.db.profile.inviteConstruction = {};
+    end
+
+    local _, instanceType = IsInInstance();
+    -- group is about ready. wake up.
+    if not GroupBuilder.db.profile.isPaused and instanceType ~= "pvp" and GetNumGroupMembers() >= 24 then
+        for i = 1, 5 do
+            C_Timer.After(2, function()
+                PlaySound(SOUNDKIT.READY_CHECK, "Dialog");
+            end);
+        end
     end
 
     for i = 1, GetNumGroupMembers() do
@@ -311,12 +319,12 @@ end
 
 local defaults = {
     profile = {
-        maxHealers = 0,
-        maxDPS = 0,
-        maxTanks = 0,
-        minGearscore = 0,
-        maxRangedDPS = 0,
-        maxMeleeDPS = 0,
+        maxHealers = "",
+        maxDPS = "",
+        maxTanks = "",
+        minGearscore = "",
+        maxRangedDPS = "",
+        maxMeleeDPS = "",
         message = "",
         minimapCoords = {},
         raidTable = {},
@@ -331,7 +339,7 @@ local defaults = {
         selectedAdvertisementRaid = "",
         minPlayersForAdvertisingCount = 15,
         constructMessageIsActive = false,
-        outOfMaxPlayers = 0,
+        outOfMaxPlayers = "",
     }
 };
 
