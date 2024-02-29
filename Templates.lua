@@ -115,8 +115,10 @@ function GroupBuilder:VaultOfArchavon25Template()
     GroupBuilder.db.profile.minGearscore = 4000;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 4;
+    GroupBuilder.db.profile.maxDPS = 15;
     GroupBuilder.db.profile.maxMeleeDPS = "";
     GroupBuilder.db.profile.maxRangedDPS = "";
+
     GroupBuilder.db.profile.maxTotalPlayers = 25;
 
 
