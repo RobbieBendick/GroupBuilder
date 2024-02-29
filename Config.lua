@@ -35,7 +35,9 @@ local raidInstanceDropdownValues = {
     ["Icecrown Citadel 10"] = "Icecrown Citadel 10",
     ["Ruby Sanctum 25"] = "Ruby Sanctum 25",
     ["Ruby Sanctum 10"] = "Ruby Sanctum 10",
-    ["None"] = "None",
+    ["Vault Of Archavon 25"] = "Vault Of Archavon 25",
+    ["Vault Of Archavon 10"] = "Vault Of Archavon 10",
+    ["Reset"] = "Reset",
 };
 
 function Config:Toggle()
@@ -148,6 +150,7 @@ function Config:GenerateClassTabs()
                     set = function(info, value)
                         local classMin = className .. "Minimum";
                         GroupBuilder.db.profile[classMin] = value;
+                        print('classMin is ', classMin)
                     end,
                     get = function(info)
                         local classMin = className .. "Minimum";
@@ -507,7 +510,7 @@ function Config:CreateMenu()
                             GroupBuilder.db.profile.maxTanks = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(GroupBuilder.db.profile.maxTanks);
+                            return tostring(GroupBuilder.db.profile.maxTanks or "");
                         end
                     }, 
                     maxHealers = {
@@ -520,7 +523,7 @@ function Config:CreateMenu()
                             GroupBuilder.db.profile.maxHealers = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(GroupBuilder.db.profile.maxHealers);
+                            return tostring(GroupBuilder.db.profile.maxHealers or "");
                         end
                     },
                     maxDPS = {
@@ -533,7 +536,7 @@ function Config:CreateMenu()
                             GroupBuilder.db.profile.maxDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(GroupBuilder.db.profile.maxDPS);
+                            return tostring(GroupBuilder.db.profile.maxDPS or "");
                         end
                     },
                     maxRangedDPS = {
@@ -546,7 +549,7 @@ function Config:CreateMenu()
                             GroupBuilder.db.profile.maxRangedDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(GroupBuilder.db.profile.maxRangedDPS);
+                            return tostring(GroupBuilder.db.profile.maxRangedDPS or "");
                         end
                     },
                     maxMeleeDPS = {
@@ -559,7 +562,7 @@ function Config:CreateMenu()
                             GroupBuilder.db.profile.maxMeleeDPS = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(GroupBuilder.db.profile.maxMeleeDPS);
+                            return tostring(GroupBuilder.db.profile.maxMeleeDPS or "");
                         end
                     },
                     gearscore = {
@@ -572,7 +575,7 @@ function Config:CreateMenu()
                             GroupBuilder.db.profile.minGearscore = tonumber(value);
                         end,
                         get = function(info) 
-                            return tostring(GroupBuilder.db.profile.minGearscore);
+                            return tostring(GroupBuilder.db.profile.minGearscore or "");
                         end
                     }
                 },
@@ -586,7 +589,6 @@ function Config:CreateMenu()
                 name = "Class Specific",
                 args = classTabs,
             },
-
             rolesAndClassesTabGroup = {
                 order = 5,
                 type = "group",
@@ -788,7 +790,7 @@ function Config:CreateMinimapIcon()
     });
 
     C_Timer.After(0.25, function ()
-        if #GroupBuilder.db.profile.minimapCoords > 0 then
+        if GroupBuilder.db.profile.minimapCoords and #GroupBuilder.db.profile.minimapCoords > 0 then
             LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetPoint(unpack(GroupBuilder.db.profile.minimapCoords));
         end
         LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetScript("OnDragStop", function (self)

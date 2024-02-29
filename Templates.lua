@@ -1,7 +1,7 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
-function GroupBuilder:NoneTemplate()
+function GroupBuilder:ResetTemplate()
     GroupBuilder.db.profile.maxDPS = 0;
     GroupBuilder.db.profile.maxTanks = 0;
     GroupBuilder.db.profile.maxHealers = 0;
@@ -10,31 +10,46 @@ function GroupBuilder:NoneTemplate()
     GroupBuilder.db.profile.minGearscore = 0;
     GroupBuilder.db.profile.maxTotalPlayers = 0;
 
-    GroupBuilder.db.profile["healerPRIESTMaximum"] = "";
-    GroupBuilder.db.profile["healerSHAMANMaximum"] = "";
-    GroupBuilder.db.profile["healerPALADINMaximum"] = "";
-    GroupBuilder.db.profile["healerDRUIDMaximum"] = "";
+    for roleName in pairs(GroupBuilder.roles) do
+        for i, class in ipairs(GroupBuilder.classes) do
+            if GroupBuilder.db.profile[roleName .. class .. "Maximum"] and GroupBuilder:Contains(GroupBuilder.roleClasses[roleName], class) then
+                GroupBuilder.db.profile[roleName .. class .. "Maximum"] = "";
+            end
+        end
+    end
 
-    GroupBuilder.db.profile["tankDRUIDMaximum"] = "";
 end
 
 function GroupBuilder:CheckForPlayerRole()
     local selectedRole = GroupBuilder.db.profile.selectedRole;
     if not selectedRole then return end
     if selectedRole == "ranged_dps" then
-        GroupBuilder.db.profile.maxDPS = GroupBuilder.db.profile.maxDPS - 1;
-        GroupBuilder.db.profile.maxRangedDPS = GroupBuilder.db.profile.maxRangedDPS - 1;
+        if GroupBuilder.db.profile.maxDPS ~= "" and GroupBuilder.db.profile.maxDPS ~= 0 then
+            GroupBuilder.db.profile.maxDPS = GroupBuilder.db.profile.maxDPS - 1;
+        end
+        if GroupBuilder.db.profile.maxRangedDPS ~= "" and GroupBuilder.db.profile.maxRangedDPS ~= 0 then
+            GroupBuilder.db.profile.maxRangedDPS = GroupBuilder.db.profile.maxRangedDPS - 1;
+        end
     elseif selectedRole == "melee_dps" then
-        GroupBuilder.db.profile.maxDPS = GroupBuilder.db.profile.maxDPS - 1;
-        GroupBuilder.db.profile.maxMeleeDPS = GroupBuilder.db.profile.maxMeleeDPS - 1;
+        if GroupBuilder.db.profile.maxDPS ~= "" and GroupBuilder.db.profile.maxDPS ~= 0 then
+            GroupBuilder.db.profile.maxDPS = GroupBuilder.db.profile.maxDPS - 1;
+        end
+        if GroupBuilder.db.profile.maxMeleeDPS ~= "" and GroupBuilder.db.profile.maxMeleeDPS ~= 0 then
+            GroupBuilder.db.profile.maxMeleeDPS = GroupBuilder.db.profile.maxMeleeDPS - 1;
+        end
     elseif selectedRole == "tank" then
-        GroupBuilder.db.profile.maxTanks = GroupBuilder.db.profile.maxTanks - 1;
+        if GroupBuilder.db.profile.maxTanks ~= "" and GroupBuilder.db.profile.maxTanks ~= 0 then
+            GroupBuilder.db.profile.maxTanks = GroupBuilder.db.profile.maxTanks - 1;
+        end
     elseif selectedRole == "healer" then
-        GroupBuilder.db.profile.maxHealers = GroupBuilder.db.profile.maxHealers - 1;
+        if GroupBuilder.db.profile.maxHealers ~= "" and GroupBuilder.db.profile.maxHealers ~= 0 then
+            GroupBuilder.db.profile.maxHealers = GroupBuilder.db.profile.maxHealers - 1;
+        end
     end
 end
 
 function GroupBuilder:IcecrownCitadel25Template()
+    GroupBuilder:ResetTemplate()
     GroupBuilder.db.profile.maxDPS = 17;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 6;
@@ -49,11 +64,15 @@ function GroupBuilder:IcecrownCitadel25Template()
 
     GroupBuilder.db.profile["tankDRUIDMaximum"] = 1;
 
+    GroupBuilder.db.profile["WARLOCKMinimum"] = 1;
+
+
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
 
 function GroupBuilder:IcecrownCitadel10Template()
+    GroupBuilder:ResetTemplate()
     GroupBuilder.db.profile.maxDPS = 5;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 3;
@@ -66,6 +85,7 @@ function GroupBuilder:IcecrownCitadel10Template()
 end
 
 function GroupBuilder:RubySanctum10Template()
+    GroupBuilder:ResetTemplate()
     GroupBuilder.db.profile.maxDPS = 5;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 3;
@@ -78,6 +98,7 @@ function GroupBuilder:RubySanctum10Template()
 end
 
 function GroupBuilder:RubySanctum25Template()
+    GroupBuilder:ResetTemplate()
     GroupBuilder.db.profile.maxDPS = 17;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 6;
@@ -89,11 +110,60 @@ function GroupBuilder:RubySanctum25Template()
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
 
+function GroupBuilder:VaultOfArchavon25Template()
+    GroupBuilder:ResetTemplate()
+    GroupBuilder.db.profile.minGearscore = 4000;
+    GroupBuilder.db.profile.maxTanks = 2;
+    GroupBuilder.db.profile.maxHealers = 4;
+    GroupBuilder.db.profile.maxMeleeDPS = "";
+    GroupBuilder.db.profile.maxRangedDPS = "";
+    GroupBuilder.db.profile.maxTotalPlayers = 25;
+
+
+    -- set 1 for each role/class pair
+    for roleName in pairs(GroupBuilder.roles) do
+        for i, class in ipairs(GroupBuilder.classes) do
+            if GroupBuilder:Contains(GroupBuilder.roleClasses[roleName], class) then
+                GroupBuilder.db.profile[roleName .. class .. "Maximum"] = 1;
+            end
+        end
+    end
+    GroupBuilder:CheckForPlayerRole();
+    AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+end
+
+function GroupBuilder:VaultOfArchavon10Template()
+    GroupBuilder:ResetTemplate()
+    GroupBuilder.db.profile.minGearscore = 4000;
+    GroupBuilder.db.profile.maxTanks = 2;
+    GroupBuilder.db.profile.maxHealers = 3;
+    GroupBuilder.db.profile.maxDPS = 5;
+    GroupBuilder.db.profile.maxMeleeDPS = "";
+    GroupBuilder.db.profile.maxRangedDPS = "";
+    GroupBuilder.db.profile.maxTotalPlayers = 10;
+
+    -- set 1 for each role/class pair
+    for roleName in pairs(GroupBuilder.roles) do
+        for i, class in ipairs(GroupBuilder.classes) do
+            if GroupBuilder:Contains(GroupBuilder.roleClasses[roleName], class) then
+                GroupBuilder.db.profile[roleName .. class .. "Maximum"] = 1;
+            end
+        end
+    end
+
+
+    GroupBuilder:CheckForPlayerRole();
+    AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+end
+
+
 
 GroupBuilder.raidTemplates = {
-    ["None"] = GroupBuilder.NoneTemplate,
+    ["Reset"] = GroupBuilder.ResetTemplate,
     ["Icecrown Citadel 25"] = GroupBuilder.IcecrownCitadel25Template,
     ["Icecrown Citadel 10"] = GroupBuilder.IcecrownCitadel10Template,
     ["Ruby Sanctum 25"] = GroupBuilder.RubySanctum25Template,
     ["Ruby Sanctum 10"] = GroupBuilder.RubySanctum10Template,
+    ["Vault Of Archavon 25"] = GroupBuilder.VaultOfArchavon25Template,
+    ["Vault Of Archavon 10"] = GroupBuilder.VaultOfArchavon10Template,
 }

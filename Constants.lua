@@ -146,18 +146,6 @@ GroupBuilder.classAbberviations = {
     ["r pal"] = "PALADIN",
 }
 
-GroupBuilder.amountOfRaidBosses = {
-    ["Icecrown Citadel"] = 12,
-    ["Ruby Sanctum"] = 1,
-}
-
-GroupBuilder.raidInstanceDropdownAcronyms = {
-    ["ICC 25"] = "Icecrown Citadel 25",
-    ["ICC 10"] = "Icecrown Citadel 10",
-    ["RS 25"] = "Ruby Sanctum 25",
-    ["RS 10"] = "Ruby Sanctum 10",
-};
-
 GroupBuilder.roleClasses = {
     ["healer"] = {
         "PRIEST",
@@ -187,6 +175,18 @@ GroupBuilder.roleClasses = {
         "PRIEST",
         "DRUID",
     },
+};
+
+GroupBuilder.amountOfRaidBosses = {
+    ["Icecrown Citadel"] = 12,
+    ["Ruby Sanctum"] = 1,
+}
+
+GroupBuilder.raidInstanceDropdownAcronyms = {
+    ["ICC 25"] = "Icecrown Citadel 25",
+    ["ICC 10"] = "Icecrown Citadel 10",
+    ["RS 25"] = "Ruby Sanctum 25",
+    ["RS 10"] = "Ruby Sanctum 10",
 };
 
 function GroupBuilder:Contains(list, value)
