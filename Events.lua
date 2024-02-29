@@ -53,26 +53,22 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if GroupBuilder.db.profile.isPaused then return end
 
     local whispererCharacterName = sender:match("([^%-]+)");
-    if GroupBuilder:IsInRaidTable(whispererCharacterName) then
+    if GroupBuilder:IsInRaidTable(whispererCharacterName) and whispererCharacterName ~= UnitName("player") then
         -- don't want to message or invite people who are already in the group.
+        print('in raid table alrdy')
         return
     end 
 
-    -- if whispererCharacterName == UnitName("player") then
-    --     return self:Print("Cannot invite yourself.");
-    -- end
+    if whispererCharacterName == UnitName("player") then
+        return self:Print("Cannot invite yourself.");
+    end
+
     local previousWhispersData;
     if GroupBuilder.db.profile.inviteConstruction then
         previousWhispersData = GroupBuilder.db.profile.inviteConstruction[whispererCharacterName];
     end
 
     local whispererClass = GroupBuilder:GetClassFromMessage(message);
-    local maxRoleValues = {
-        ["ranged_dps"] = GroupBuilder.db.profile.maxRangedDPS,
-        ["melee_dps"] = GroupBuilder.db.profile.maxMeleeDPS,
-        ["tank"] = GroupBuilder.db.profile.maxTanks,
-        ["healer"] = GroupBuilder.db.profile.maxHealers
-    };
 
 
 
@@ -213,24 +209,33 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end
     end
 
+    local maxRoleValues = {
+        ["ranged_dps"] = GroupBuilder.db.profile.maxRangedDPS,
+        ["melee_dps"] = GroupBuilder.db.profile.maxMeleeDPS,
+        ["tank"] = GroupBuilder.db.profile.maxTanks,
+        ["healer"] = GroupBuilder.db.profile.maxHealers
+    };
     -- check role compatibility with group
     for roleName, max in pairs(maxRoleValues) do
-        if roleName == "ranged_dps" or roleName == "melee_dps" then
-            if GroupBuilder:CountPlayersByRole("dps") >= GroupBuilder.db.profile.maxDPS or GroupBuilder:CountPlayersByRole(roleName) >= max then 
-                self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
-                return;
-            end
-        else
-            if GroupBuilder:CountPlayersByRole(roleName) >= max then 
-                self:Print("Too many " .. roleName .. "s");
-                return;
+        if max and max ~= "" then
+            if roleName == "ranged_dps" or roleName == "melee_dps" then
+                print("max: ", tostring(max or 0))
+                print('roleName: ', roleName)
+                if ( GroupBuilder:CountPlayersByRole("dps") >= tonumber(GroupBuilder.db.profile.maxDPS) ) or ( GroupBuilder:CountPlayersByRole(roleName) >= tonumber(max) ) then 
+                    self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
+                    return;
+                end
+            else
+                if GroupBuilder:CountPlayersByRole(roleName) >= tonumber(max) then 
+                    self:Print("Too many " .. roleName .. "s");
+                    return;
+                end
             end
         end
     end
 
     -- check max role and class (ex: only 1 healer paladin)
     if GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= nil and GroupBuilder.db.profile[role .. whispererClass .. "Maximum"] ~= "" and GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass) >= tonumber(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]) then
-        print("GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass): ", GroupBuilder:CountPlayersByRoleAndClass(role, whispererClass))
         return self:Print("Too many " .. role:gsub("_", " ") ..  " " .. whispererClass:lower() .. "s, " .. "max is " .. tostring(GroupBuilder.db.profile[role .. whispererClass .. "Maximum"]));
     end
 

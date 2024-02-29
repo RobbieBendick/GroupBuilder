@@ -69,13 +69,11 @@ function GroupBuilder:CountPlayersByRoleAndClass(role, class)
     local count = 0;
     for characterName, characterData in pairs(GroupBuilder.db.profile.raidTable) do
         if characterData.role == role and characterData.class == class then
-            print("char name: ", characterName)
             count = count + 1;
         end
     end
     for characterName, characterData in pairs(GroupBuilder.db.profile.invitedTable) do
         if characterData.role == role and characterData.class == class then
-            print("char name: ", characterName)
             count = count + 1;
         end
     end

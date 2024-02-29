@@ -100,6 +100,7 @@ GroupBuilder.classAbberviations = {
     ["war"] = "WARRIOR",
 
     ["disc"] = "PRIEST",
+    ["dics"] = "PRIEST",
     ["priest"] = "PRIEST",
     ["pri"] = "PRIEST",
 
