@@ -26,12 +26,8 @@ GroupBuilder.roles = {
         "h pal",
     },
     ["tank"] = {
-        "prot pal",
         "prot",
-        "protection",
         "tank",
-        "tank frost",
-        "frost tank",
         "blood",
     },
     ["melee_dps"] = {
@@ -64,6 +60,9 @@ GroupBuilder.roles = {
         "hunter",
         "hunt",
         "surv",
+        "marks",
+        "bm",
+        "beast",
 
         "mage",
         "mag",
@@ -75,7 +74,7 @@ GroupBuilder.roles = {
         "warlock",
         "lock",
 
-        "spriest",
+        "spr",
         "shadow",
 
         "boom",
