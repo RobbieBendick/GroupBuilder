@@ -22,8 +22,28 @@ function GroupBuilder:AddPlayerToRaidTable(name, role, gearscore)
         playerInfo["gearscore"] = gearscore;
     end
     GroupBuilder.db.profile.raidTable[name] = playerInfo;
-    print(("Added %s to raidTab as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"))
+    print(("Added %s to raidTab as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"));
 end
+
+function GroupBuilder:AddPlayerToInviteTable(name, role, gearscore)
+    local _, class = UnitClass(name);
+    local playerInfo = {
+        ["class"] = class,
+        ["role"] = role,
+    }
+    if gearscore then
+        playerInfo["gearscore"] = gearscore;
+    end
+    GroupBuilder.db.profile.invitedTable[name] = playerInfo;
+    C_Timer.After(GroupBuilder.inviteExpirationTime, function ()
+        if not GroupBuilder:IsInRaidTable(name) then
+            GroupBuilder.db.profile.invitedTable[name] = nil;
+        end
+    end);
+
+    print(("Added %s to Invited Table as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"));
+end
+
 
 function GroupBuilder:RemovePlayerFromRaidTable(name)
     GroupBuilder.db.profile.raidTable[name] = nil;
@@ -53,9 +73,17 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if GroupBuilder.db.profile.isPaused then return end
 
     local whispererCharacterName = sender:match("([^%-]+)");
+    if GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName] then
+        GroupBuilder:Print('inviting', whispererCharacterName);
+        InviteUnit(whispererCharacterName);
+        if not GroupBuilder:IsInInvitedTable(whispererCharacterName) then
+            GroupBuilder:AddPlayerToInviteTable(unpack(GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName]));
+        end
+    end
+
     if GroupBuilder:IsInRaidTable(whispererCharacterName) and whispererCharacterName ~= UnitName("player") then
         -- don't want to message or invite people who are already in the group.
-        print('in raid table alrdy')
+        self:Print('in raid table alrdy');
         return
     end 
 
@@ -69,8 +97,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     end
 
     local whispererClass = GroupBuilder:GetClassFromMessage(message);
-
-
 
     local gearscoreNumber = GroupBuilder:FindGearscore(message);
     if not gearscoreNumber then
@@ -188,6 +214,16 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end);
         return
     end
+
+    if not whispererClass then
+        self:Print("No class found.");
+        C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
+            SendChatMessage("spec & class?", "WHISPER", nil, whispererCharacterName);
+            self:IncrementCharacterInteractedWith(whispererCharacterName);
+        end);
+        return
+    end
+
     -- check maximum of this particular class
     if GroupBuilder.db.profile[whispererClass.."Maximum"] ~= nil and GroupBuilder.db.profile[whispererClass.."Maximum"] ~= "" and GroupBuilder:FindClassCount(whispererClass) >= tonumber(GroupBuilder.db.profile[whispererClass.."Maximum"]) then
         return self:Print("Too many " .. whispererClass:sub(1, 1) .. whispererClass:sub(2):lower() .. "s");
@@ -253,8 +289,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     end)
 
     -- remove them from invited table if invite expires
-    local inviteExpirationTime = 122;
-    C_Timer.After(inviteExpirationTime + GroupBuilder.maxDelayTime, function ()
+    C_Timer.After(GroupBuilder.inviteExpirationTime + GroupBuilder.maxDelayTime, function ()
         if not GroupBuilder:IsInRaidTable(whispererCharacterName) and GroupBuilder:IsInInvitedTable(whispererCharacterName) then
             GroupBuilder.db.profile.invitedTable[whispererCharacterName] = nil;
         end
@@ -272,6 +307,7 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
         GroupBuilder.db.profile.raidTable = {};
         GroupBuilder.db.profile.invitedTable = {};
         GroupBuilder.db.profile.inviteConstruction = {};
+        GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
     end
 
     local _, instanceType = IsInInstance();
@@ -283,10 +319,10 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
             end);
         end
     end
-
+    local names = {};
     for i = 1, GetNumGroupMembers() do
         local name = GetRaidRosterInfo(i);
-	
+        table.insert(names, name);
         if GroupBuilder:IsInInvitedTable(name) and not GroupBuilder:IsInRaidTable(name) then
             local role = GroupBuilder.db.profile.invitedTable[name].role;
             local gs = GroupBuilder.db.profile.invitedTable[name].gearscore;
@@ -301,11 +337,12 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
             GroupBuilder.db.profile.inviteConstruction[name] = nil;
         end
     end
-    local j = 1;
-    if GroupBuilder.db.profile.raidTable and #GroupBuilder.db.profile.raidTable > 0 then
-        for unitName, unitData in pairs(GroupBuilder.db.profile.raidTable) do
-            GroupBuilder:Print("Raid member ".. j .. "is " .. unitName .. ", a" .. unitData.role .. " " .. unitData.class);
-            j = j + 1;
+
+    for playerName, playerData in pairs(GroupBuilder.db.profile.raidTable) do
+        if not GroupBuilder:Contains(names, playerName) then
+            -- player left the group.
+            GroupBuilder:RemovePlayerFromRaidTable(playerName);
+            GroupBuilder.db.profile.raidPlayersThatLeftGroup[playerName] = playerData;
         end
     end
 end
@@ -328,6 +365,7 @@ local defaults = {
         message = "",
         minimapCoords = {},
         raidTable = {},
+        raidPlayersThatLeftGroup = {},
         invitedTable = {},
         inviteConstruction = {},
         isPaused = true,
@@ -352,6 +390,7 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.raidTable = {};
             GroupBuilder.db.profile.invitedTable = {};
             GroupBuilder.db.profile.inviteConstruction = {};
+            GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         end 
     end);
     

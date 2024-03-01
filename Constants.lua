@@ -1,6 +1,7 @@
 local GroupBuilder = _G.LibStub("AceAddon-3.0"):NewAddon("GroupBuilder", "AceConsole-3.0", "AceEvent-3.0");
 GroupBuilder.addonName = "GroupBuilder";
 GroupBuilder.recentlyInteractedWith = {};
+GroupBuilder.inviteExpirationTime = 122;
 GroupBuilder.minDelayTime = 4;
 GroupBuilder.maxDelayTime = 10;
 GroupBuilder.roles = {
@@ -13,22 +14,24 @@ GroupBuilder.roles = {
         "rdruu",
         "rdruid",
         "rdru",
+        "tree",
 
         "dics",
         "disc",
+        "dpr",
 
         "hpal",
         "holy pa",
         "hpal",
         "h pal",
-        "tree",
     },
     ["tank"] = {
         "prot pal",
         "prot",
         "protection",
         "tank",
-        "frost d",
+        "tank frost",
+        "frost tank",
         "blood",
     },
     ["melee_dps"] = {
@@ -53,12 +56,14 @@ GroupBuilder.roles = {
 
         "unh",
         "dk",
+        "frost",
         "death",
         "deaht",
     },
     ["ranged_dps"] = {
         "hunter",
         "hunt",
+        "surv",
 
         "mage",
         "mag",
@@ -103,12 +108,14 @@ GroupBuilder.classAbberviations = {
     ["dics"] = "PRIEST",
     ["priest"] = "PRIEST",
     ["pri"] = "PRIEST",
+    ["dpr"] = "PRIEST",
 
     ["mage"] = "MAGE",
     ["mag"] = "MAGE",
 
     ["hunter"] = "HUNTER",
     ["hunt"] = "HUNTER",
+    ["surv"] = "HUNTER",
     
     ["death"] = "DEATHKNIGHT",
     ["deaht"] = "DEATHKNIGHT",
@@ -189,8 +196,6 @@ GroupBuilder.raidInstanceDropdownAcronyms = {
     ["RS 25"] = "Ruby Sanctum 25",
     ["RS 10"] = "Ruby Sanctum 10",
 };
-
-
 
 
 function GroupBuilder:Contains(list, value)
