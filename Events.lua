@@ -73,13 +73,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if GroupBuilder.db.profile.isPaused then return end
 
     local whispererCharacterName = sender:match("([^%-]+)");
-    if GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName] then
-        GroupBuilder:Print('inviting', whispererCharacterName);
-        InviteUnit(whispererCharacterName);
-        if not GroupBuilder:IsInInvitedTable(whispererCharacterName) then
-            GroupBuilder:AddPlayerToInviteTable(unpack(GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName]));
-        end
-    end
+
 
     if GroupBuilder:IsInRaidTable(whispererCharacterName) and whispererCharacterName ~= UnitName("player") then
         -- don't want to message or invite people who are already in the group.
@@ -126,6 +120,12 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     if GroupBuilder.db.profile.minGearscore and gearscoreNumber and gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
         self:Print("Player does not meet Gearscore requirement.");
+    end
+
+    if not GroupBuilder:IsInRaidTable(whispererCharacterName) and GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName] then
+        whispererClass = GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName].class;
+        role = GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName].role;
+        gearscoreNumber = GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName].gearscore;
     end
 
 

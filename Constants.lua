@@ -153,15 +153,11 @@ GroupBuilder.classAbberviations = {
     ["tree"] = "DRUID",
     ["tere"] = "DRUID",
 
-    ["hpal"] = "PALADIN",
+    ["pal"] = "PALADIN",
     ["holy pa"] = "PALADIN",
-    ["hpal"] = "PALADIN",
-    ["h pal"] = "PALADIN",
-    ["pala"] = "PALADIN",
-    ["pally"] = "PALADIN",
+    ["ret pa"] = "PALADIN",
+    ["rte pa"] = "PALADIN",
     ["ret"] = "PALADIN",
-    ["rpal"] = "PALADIN",
-    ["r pal"] = "PALADIN",
 }
 
 GroupBuilder.roleClasses = {
