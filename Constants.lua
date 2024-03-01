@@ -18,6 +18,7 @@ GroupBuilder.roles = {
 
         "dics",
         "disc",
+        "dsi",
         "dpr",
 
         "hpal",
@@ -99,11 +100,13 @@ GroupBuilder.classes = {
 GroupBuilder.classAbberviations = {
     ["roeg"] = "ROGUE",
     ["rog"] = "ROGUE",
+    ["riog"] = "ROGUE",
 
     ["warrior"] = "WARRIOR",
     ["war"] = "WARRIOR",
 
     ["disc"] = "PRIEST",
+    ["dsi"] = "PRIEST",
     ["dics"] = "PRIEST",
     ["priest"] = "PRIEST",
     ["pri"] = "PRIEST",

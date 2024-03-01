@@ -1,14 +1,11 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local Config = GroupBuilder.Config;
 
-
 function GroupBuilder:IsInRaidTable(name)
-    if not GroupBuilder.db.profile.raidTable then return nil end
     return GroupBuilder.db.profile.raidTable[name] ~= nil;
 end
 
 function GroupBuilder:IsInInvitedTable(name)
-    if not GroupBuilder.db.profile.invitedTable then return nil end
     return GroupBuilder.db.profile.invitedTable[name] ~= nil;
 end
 
@@ -44,7 +41,6 @@ function GroupBuilder:AddPlayerToInviteTable(name, role, gearscore)
     print(("Added %s to Invited Table as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"));
 end
 
-
 function GroupBuilder:RemovePlayerFromRaidTable(name)
     GroupBuilder.db.profile.raidTable[name] = nil;
 end
@@ -74,11 +70,10 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
 
     local whispererCharacterName = sender:match("([^%-]+)");
 
-
     if GroupBuilder:IsInRaidTable(whispererCharacterName) and whispererCharacterName ~= UnitName("player") then
         -- don't want to message or invite people who are already in the group.
         self:Print('in raid table alrdy');
-        return
+        return;
     end 
 
     -- if whispererCharacterName == UnitName("player") then
@@ -126,6 +121,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         whispererClass = GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName].class;
         role = GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName].role;
         gearscoreNumber = GroupBuilder.db.profile.raidPlayersThatLeftGroup[whispererCharacterName].gearscore;
+        self:Print("Getting previous character data for ".. whispererCharacterName);
     end
 
 
@@ -163,28 +159,28 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
-            return
+            return;
         end
         C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
             SendChatMessage("class?", "WHISPER", nil, whispererCharacterName);
             self:IncrementCharacterInteractedWith(whispererCharacterName);
         end);
-        return
+        return;
     elseif onlyGSIsMissing then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
-            return
+            return;
         end
         C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
             SendChatMessage("gs?", "WHISPER", nil, whispererCharacterName);
             self:IncrementCharacterInteractedWith(whispererCharacterName);
         end);
-        return
+        return;
     elseif onlyHaveGS then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
-            return
+            return;
         end
         C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
             SendChatMessage("spec & class?", "WHISPER", nil, whispererCharacterName);
@@ -194,25 +190,25 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     elseif onlyHaveClass then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
-            return
+            return;
         end
 
         C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
             SendChatMessage("spec & gs?", "WHISPER", nil, whispererCharacterName);
             self:IncrementCharacterInteractedWith(whispererCharacterName);
         end);
-        return
+        return;
     elseif onlyHaveRole then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
 
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
-            return
+            return;
         end
         C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
             SendChatMessage("spec & gs?", "WHISPER", nil, whispererCharacterName);
             self:IncrementCharacterInteractedWith(whispererCharacterName);
         end);
-        return
+        return;
     end
 
     if not whispererClass then
@@ -221,7 +217,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
             SendChatMessage("spec & class?", "WHISPER", nil, whispererCharacterName);
             self:IncrementCharacterInteractedWith(whispererCharacterName);
         end);
-        return
+        return;
     end
 
     -- check maximum of this particular class
@@ -232,7 +228,10 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if not GroupBuilder.db.profile.maxTotalPlayers then
         return self:Print("Please set the total number of expected players in the Group Requirements options page.");
     end
+
+
     -- TODO: gotta refactor this ugly section later...
+
     -- check if we have room with minimum number of other classes we need in mind
     if GroupBuilder:IsClassNeededForMinimum(whispererClass) then
         if GetNumGroupMembers() + GroupBuilder:FindTotalMinimumOfMissingClasses() - 1 >= GroupBuilder.db.profile.maxTotalPlayers then
@@ -254,8 +253,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
     for roleName, max in pairs(maxRoleValues) do
         if max and max ~= "" then
             if roleName == "ranged_dps" or roleName == "melee_dps" then
-                print("max: ", tostring(max or 0))
-                print('roleName: ', roleName)
                 if ( GroupBuilder:CountPlayersByRole("dps") >= tonumber(GroupBuilder.db.profile.maxDPS) ) or ( GroupBuilder:CountPlayersByRole(roleName) >= tonumber(max) ) then 
                     self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
                     return;
@@ -311,8 +308,11 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
     end
 
     local _, instanceType = IsInInstance();
+
+    -- (24/25) (9/10) // this would be a thresholdPlayersMissing of 1
+    local thresholdPlayersMissing = 1;
     -- group is about ready. wake up.
-    if not GroupBuilder.db.profile.isPaused and instanceType ~= "pvp" and GetNumGroupMembers() >= 24 then
+    if not GroupBuilder.db.profile.isPaused and instanceType ~= "pvp" and GetNumGroupMembers() >= GroupBuilder.db.profile.maxTotalPlayers - thresholdPlayersMissing then
         for i = 1, 5 do
             C_Timer.After(2, function()
                 PlaySound(SOUNDKIT.READY_CHECK, "Dialog");
