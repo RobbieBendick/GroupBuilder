@@ -7,7 +7,7 @@
       - Generally, specifying a spec is sufficient; for example, 'Disc' will be assumed as healer. However, certain specs like Frost DK are ambiguous and require clarification since they can be either a tank or a DPS.
   - Most of the time Class is inferred from the spec/role.
     - For instance, one time where we would need clarification on the class is if the message was "Resto". Since Resto could refer to a Shaman or a Druid, we can't infer the class from just "Resto".
-  - Messages players back asking for the missing pieces of information that we need. (A maximum of 1 whisper to any player.)
+  - Messages players back asking for the missing pieces of information that we need. (A maximum of 1 whisper to per player.)
       - Remembers the pieces of information that we need from previous messages.
 - Available Options
   - Maximum/Minimum of a certain class.
