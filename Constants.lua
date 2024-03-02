@@ -11,20 +11,28 @@ GroupBuilder.roles = {
         "resto sh",
 
         "rdrru",
-        "rdruu",
         "rdruid",
         "rdru",
         "tree",
+        "haeler dru",
+        "healre dru",
+        "hael dru",
 
         "dics",
         "disc",
         "dsi",
         "dpr",
+        "heal pri",
+        "haeler pri",
+        "healre pri",
 
         "hpal",
         "holy pa",
         "hpal",
         "h pal",
+        "heal pal",
+        "haeler pal",
+        "healre pal",
     },
     ["tank"] = {
         "prot",
@@ -158,7 +166,6 @@ GroupBuilder.classAbberviations = {
 
     ["pal"] = "PALADIN",
     ["holy pa"] = "PALADIN",
-    ["ret pa"] = "PALADIN",
     ["rte pa"] = "PALADIN",
     ["ret"] = "PALADIN",
 }

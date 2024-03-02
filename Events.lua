@@ -19,7 +19,7 @@ function GroupBuilder:AddPlayerToRaidTable(name, role, gearscore)
         playerInfo["gearscore"] = gearscore;
     end
     GroupBuilder.db.profile.raidTable[name] = playerInfo;
-    print(("Added %s to raidTab as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"));
+    print(("Added %s to Raid Table as %s %s with a gearscore of %s"):format(name, role, class, gearscore or "N/A"));
 end
 
 function GroupBuilder:AddPlayerToInviteTable(name, role, gearscore)
@@ -147,14 +147,14 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
 
         if GroupBuilder.recentlyInteractedWith[whispererCharacterName] and GroupBuilder.recentlyInteractedWith[whispererCharacterName] >= amountOfInteractionsBeforeStopping then
-            return
+            return;
         end
 
         C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
             SendChatMessage("spec?", "WHISPER", nil, whispererCharacterName);
             self:IncrementCharacterInteractedWith(whispererCharacterName);
         end);
-        return
+        return;
     elseif onlyClassIsMissing then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
