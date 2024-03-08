@@ -697,15 +697,32 @@ function Config:CreateAdvertisementMessage()
         messageToSend = messageToSend .. " " .. GroupBuilder.db.profile.selectedSRRaidInfo;
     end
 
+    -- find most missing role
+    if GroupBuilder.db.profile.maxTotalPlayers and GroupBuilder.db.profile.maxTotalPlayers ~= "" and tonumber(GroupBuilder.db.profile.maxTotalPlayers) == 10 then
+        if GetNumGroupMembers() >= 7 then
+            local mostMissingRole, secondMostMissingRole = GroupBuilder:FindMostNeededRoles();
+            if mostMissingRole then
+                messageToSend = messageToSend .. " NEED MORE " .. mostMissingRole:upper() .. "S";
+            end
+        end
+    elseif GroupBuilder.db.profile.maxTotalPlayers and GroupBuilder.db.profile.maxTotalPlayers ~= "" and tonumber(GroupBuilder.db.profile.maxTotalPlayers) == 25 then
+        if GetNumGroupMembers() >= 16 then
+            local mostMissingRole, secondMostMissingRole = GroupBuilder:FindMostNeededRoles();
+            if mostMissingRole then
+                messageToSend = messageToSend .. " NEED MORE " .. mostMissingRole:upper() .. "S";
+            end
+        end
+    end
+
+
     if GroupBuilder.db.profile.advertisementHeroicBossCount then
         if not GroupBuilder.db.profile.selectedAdvertisementRaid then
-            GroupBuilder:Print("Please select a raid instance in the GroupBuilder Advertising Message settings.")
+            GroupBuilder:Print("Please select a raid instance in the GroupBuilder Advertising Message settings.");
         else
-            messageToSend = messageToSend .. " (" .. GroupBuilder.db.profile.advertisementHeroicBossCount .. " HC)" 
+            messageToSend = messageToSend .. " (" .. GroupBuilder.db.profile.advertisementHeroicBossCount .. " HC)" ;
         end
     end 
 
-    -- TODO: if there are atleast 15 players, find most missing-est roles and place in the message.
 
     SendChatMessage(messageToSend, "WHISPER", nil, "Robertdogert");
 end

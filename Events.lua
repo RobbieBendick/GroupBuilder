@@ -9,6 +9,62 @@ function GroupBuilder:IsInInvitedTable(name)
     return GroupBuilder.db.profile.invitedTable[name] ~= nil;
 end
 
+function GroupBuilder:GetMaxNumPlayersNeededForRole(role)
+    if role == "healer" then
+        return tonumber(GroupBuilder.db.profile.maxHealers) or 0
+    elseif role == "tank" then
+        return tonumber(GroupBuilder.db.profile.maxTanks) or 0
+    elseif role == "melee_dps" or role == "ranged_dps" then
+        return tonumber(GroupBuilder.db.profile.maxDPS) or 0
+    else
+        return 0
+    end
+end
+
+function GroupBuilder:FindMostNeededRoles()
+    local roleCounts = {
+        ["tank"] = 0,
+        ["healer"] = 0,
+        ["dps"] = 0,
+    }
+    
+    -- count the number of players in each role
+    for playerName, playerData in pairs(GroupBuilder.db.profile.raidTable) do
+        if playerData.role then
+            if playerData.role == "melee_dps" or playerData.role == "ranged_dps" then
+                roleCounts["dps"] = roleCounts["dps"] + 1;
+            else
+                roleCounts[playerData.role] = roleCounts[playerData.role] + 1;
+            end
+        end
+    end
+    
+    -- calculate the percentage of each role filled
+    local rolePercentages = {};
+    for role, count in pairs(roleCounts) do
+        local playersNeededForRole = GroupBuilder:GetMaxNumPlayersNeededForRole(role);
+        rolePercentages[role] = count / playersNeededForRole;
+    end
+    
+    -- find the most "missing" two roles based on the lowest percentages
+    local mostNeededRoles = {};
+    local lowestPercentages = {math.huge, math.huge};
+    
+    for role, percentage in pairs(rolePercentages) do
+        if percentage < lowestPercentages[1] then
+            mostNeededRoles[2] = mostNeededRoles[1];
+            lowestPercentages[2] = lowestPercentages[1];
+            mostNeededRoles[1] = role;
+            lowestPercentages[1] = percentage;
+        elseif percentage < lowestPercentages[2] then
+            mostNeededRoles[2] = role;
+            lowestPercentages[2] = percentage;
+        end
+    end
+    
+    return mostNeededRoles[1], mostNeededRoles[2];
+end
+
 function GroupBuilder:AddPlayerToRaidTable(name, role, gearscore)
     local _, class = UnitClass(name);
     local playerInfo = {
@@ -66,7 +122,6 @@ function GroupBuilder:IncrementCharacterInteractedWith(characterName)
 end
 
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
-    print(self:FindGearscore(message))
     if GroupBuilder.db.profile.isPaused then return end
 
     local whispererCharacterName = sender:match("([^%-]+)");
@@ -106,11 +161,11 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end
     end
 
-    if previousWhispersData and not whispererClass then
-        if previousWhispersData.class then
+    if not whispererClass then
+        if previousWhispersData and previousWhispersData.class then
             whispererClass = previousWhispersData.class
         else
-            self:Print("No class mentioned.");
+            self:Print("Class not found.");
         end
     end
 
@@ -364,10 +419,10 @@ local defaults = {
         maxHealers = "",
         maxDPS = "",
         maxTanks = "",
-        minGearscore = "",
         maxRangedDPS = "",
         maxMeleeDPS = "",
         message = "",
+        minGearscore = "",
         minimapCoords = {},
         raidTable = {},
         raidPlayersThatLeftGroup = {},

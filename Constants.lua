@@ -10,6 +10,12 @@ GroupBuilder.roles = {
         "resto",
         "rsham",
         "resto sh",
+        "healer sha",
+        "heal sham",
+        "hael sham",
+        "sham heal",
+        "shaman heal",
+        "shamna heal",
 
         "rdrru",
         "rdruid",
@@ -27,9 +33,6 @@ GroupBuilder.roles = {
         "drood hea",
         "droo hea",
 
-
-
-
         "dics",
         "disc",
         "dsi",
@@ -43,10 +46,10 @@ GroupBuilder.roles = {
         "prist hea",
         "perist hea",
 
-        "hpal",
         "holy pa",
         "hpal",
         "h pal",
+        "h apl",
         "heal pal",
         "haeler pal",
         "healre pal",
@@ -67,18 +70,21 @@ GroupBuilder.roles = {
         "rog",
 
         "feral",
+        "freal",
 
         "enh",
-        "enhancement",
         "enhance",
     
         "ret",
-        "retr",
+        "rte",
 
         "warrior",
         "war",
         "fwar",
+        "war dps",
         "warr dps",
+        "fuyr war",
+        "fruy war",
         "fury war",
         "dps war",
 
@@ -89,12 +95,14 @@ GroupBuilder.roles = {
         "deaht",
     },
     ["ranged_dps"] = {
-        "hunter",
         "hunt",
+        "htun",
+        "hnut",
         "surv",
         "marks",
         "bm",
         "beast",
+        "baest",
 
         "mage",
         "mag",
@@ -112,6 +120,12 @@ GroupBuilder.roles = {
         "boom",
         "moon",
         "balance",
+        "boom",
+        "booy",
+        "balance",
+        "balacn",
+        "moon",
+        "mono",
     },
 };
 
@@ -175,6 +189,8 @@ GroupBuilder.classAbberviations = {
     ["booy"] = "DRUID",
     ["balance"] = "DRUID",
     ["balacn"] = "DRUID",
+    ["moon"] = "DRUID",
+    ["mono"] = "DRUID",
     ["feral"] = "DRUID",
     ["freal"] = "DRUID",
     ["rdriu"] = "DRUID",
@@ -182,13 +198,12 @@ GroupBuilder.classAbberviations = {
     ["rdru"] = "DRUID",
     ["dru"] = "DRUID",
     ["druid"] = "DRUID",
-    ["moon"] = "DRUID",
-    ["mono"] = "DRUID",
     ["tree"] = "DRUID",
     ["tere"] = "DRUID",
 
     ["pal"] = "PALADIN",
     ["holy pa"] = "PALADIN",
+    ["hloy pa"] = "PALADIN",
     ["rte pa"] = "PALADIN",
     ["ret"] = "PALADIN",
 }
