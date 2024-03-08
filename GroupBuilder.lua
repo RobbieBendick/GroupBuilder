@@ -42,9 +42,9 @@ function GroupBuilder:FindGearscore(message)
     local keywordPatternWithRole = "(%d*%.?%d*)%s*([kK]?)%s*(.-)";
     for number, gsSuffix, role in message:lower():gmatch(keywordPatternWithRole) do
         if not string.find(role, "budg") then
-            gearscoreNumber = tonumber(number)
+            gearscoreNumber = tonumber(number);
             if gearscoreNumber and gearscoreNumber < 1000 then
-                -- Treat numbers below 1000 as decimals and multiply them by 1000
+                -- treat numbers below 1000 as decimals and multiply them by 1000
                 gearscoreNumber = gearscoreNumber * 1000;
             end
 

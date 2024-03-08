@@ -141,7 +141,6 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         previousWhispersData = GroupBuilder.db.profile.inviteConstruction[whispererCharacterName];
     end
 
-    local whispererClass = GroupBuilder:GetClassFromMessage(message);
 
     local gearscoreNumber = GroupBuilder:FindGearscore(message);
     if not gearscoreNumber then
@@ -161,6 +160,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         end
     end
 
+    local whispererClass = GroupBuilder:GetClassFromMessage(message);
     if not whispererClass then
         if previousWhispersData and previousWhispersData.class then
             whispererClass = previousWhispersData.class
@@ -310,13 +310,11 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         if max and max ~= "" then
             if roleName == "ranged_dps" or roleName == "melee_dps" then
                 if ( GroupBuilder:CountPlayersByRole("dps") >= tonumber(GroupBuilder.db.profile.maxDPS) ) or ( GroupBuilder:CountPlayersByRole(roleName) >= tonumber(max) ) then 
-                    self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
-                    return;
+                    return self:Print("Too many " .. roleName .. "s " .. "or full on DPS.");
                 end
             else
                 if GroupBuilder:CountPlayersByRole(roleName) >= tonumber(max) then 
-                    self:Print("Too many " .. roleName .. "s");
-                    return;
+                    return self:Print("Too many " .. roleName .. "s");
                 end
             end
         end

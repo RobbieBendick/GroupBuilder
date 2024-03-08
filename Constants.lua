@@ -62,8 +62,12 @@ GroupBuilder.roles = {
     },
     ["tank"] = {
         "prot",
+        "prt",
+        "port",
         "tank",
+        "tnak",
         "blood",
+        "blod",
     },
     ["melee_dps"] = {
         "rogue",
@@ -91,6 +95,7 @@ GroupBuilder.roles = {
         "unh",
         "dk",
         "frost",
+        "frsot",
         "death",
         "deaht",
     },
