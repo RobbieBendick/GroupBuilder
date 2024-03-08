@@ -66,6 +66,7 @@ function GroupBuilder:IncrementCharacterInteractedWith(characterName)
 end
 
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
+    print(self:FindGearscore(message))
     if GroupBuilder.db.profile.isPaused then return end
 
     local whispererCharacterName = sender:match("([^%-]+)");
@@ -295,7 +296,11 @@ end
 
 
 function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
+    -- update player in the raid table
     local playerName = UnitName("player");
+    if GroupBuilder:IsInRaidTable(playerName) and GroupBuilder.db.profile.selectedRole ~= GroupBuilder.db.profile.raidTable[playerName].role then
+        GroupBuilder.db.profile.raidTable[playerName].role = GroupBuilder.db.profile.selectedRole;
+    end 
     if GroupBuilder.db.profile.selectedRole and not GroupBuilder:IsInRaidTable(playerName) then
         GroupBuilder:AddPlayerToRaidTable(playerName, GroupBuilder.db.profile.selectedRole);
     end

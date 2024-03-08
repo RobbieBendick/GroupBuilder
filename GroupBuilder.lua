@@ -18,17 +18,53 @@ function GroupBuilder:FindRole(message)
 end
 
 function GroupBuilder:FindGearscore(message)
-    local keywordPatternWithGearscoreRole = "(%d*%.?%d+)";
+    local keywordPatternWithGearscoreRole = "(%d*%.?%d*)%s*([kK]?)%s*gs%s*(%d*%.?%d*)%s*([kK]?)%s*(.-)";
     local gearscoreNumber;
+
     -- check for pattern with number followed by a role
-    for number, role in message:lower():gmatch(keywordPatternWithGearscoreRole) do
-        gearscoreNumber = tonumber(number);
-        if gearscoreNumber < 1000 then
-            -- multiply the number by 1000 to interpret decimals as thousands
-            gearscoreNumber = gearscoreNumber * 1000;
+    for number, gsSuffix1, number2, gsSuffix2, role in message:lower():gmatch(keywordPatternWithGearscoreRole) do
+        if not string.find(role, "budg") then
+            local multiplier = 1
+            if gsSuffix1 == "k" or gsSuffix2 == "k" then
+                multiplier = 1000
+            end
+            gearscoreNumber = tonumber(number) or tonumber(number2)
+            if gearscoreNumber and gearscoreNumber < 1000 then
+                -- Treat numbers below 1000 as decimals and multiply them by 1000
+                gearscoreNumber = gearscoreNumber * 1000
+            end
+            -- either a fake gs or was calculated wrong
+            if gearscoreNumber >= GroupBuilder.maxGearscoreNumber then
+                return nil;
+            end
+
+            return gearscoreNumber
         end
-        break;
     end
 
-    return gearscoreNumber;
+    -- Check for a number followed by a role without "gs" in between
+    local keywordPatternWithRole = "(%d*%.?%d*)%s*([kK]?)%s*(.-)";
+    for number, gsSuffix, role in message:lower():gmatch(keywordPatternWithRole) do
+        if not string.find(role, "budg") then
+            local multiplier = 1
+            if gsSuffix == "k" then
+                multiplier = 1000
+            end
+            gearscoreNumber = tonumber(number)
+            if gearscoreNumber and gearscoreNumber < 1000 then
+                -- Treat numbers below 1000 as decimals and multiply them by 1000
+                gearscoreNumber = gearscoreNumber * 1000
+            end
+
+            -- either a fake gs or was calculated wrong
+            if gearscoreNumber >= GroupBuilder.maxGearscoreNumber then
+                return nil;
+            end
+
+            return gearscoreNumber
+        end
+    end
+
+    return nil;
 end
+

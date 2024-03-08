@@ -4,6 +4,7 @@ GroupBuilder.recentlyInteractedWith = {};
 GroupBuilder.inviteExpirationTime = 122;
 GroupBuilder.minDelayTime = 4;
 GroupBuilder.maxDelayTime = 10;
+GroupBuilder.maxGearscoreNumber = 10000;
 GroupBuilder.roles = {
     ["healer"] = {
         "resto",
@@ -17,6 +18,17 @@ GroupBuilder.roles = {
         "haeler dru",
         "healre dru",
         "hael dru",
+        "dru heal",
+        "dru hae",
+        "druid heal",
+        "druid hae",
+        "dru hae",
+        "dru heal",
+        "drood hea",
+        "droo hea",
+
+
+
 
         "dics",
         "disc",
@@ -25,6 +37,11 @@ GroupBuilder.roles = {
         "heal pri",
         "haeler pri",
         "healre pri",
+        "priest hea",
+        "pri hea",
+        "preist hea",
+        "prist hea",
+        "perist hea",
 
         "hpal",
         "holy pa",
@@ -33,6 +50,12 @@ GroupBuilder.roles = {
         "heal pal",
         "haeler pal",
         "healre pal",
+        "pal heal",
+        "pall heal",
+        "pali heal",
+        "palli heal",
+        "pala heal",
+        "pally heal",
     },
     ["tank"] = {
         "prot",
