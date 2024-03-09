@@ -8,12 +8,17 @@ GroupBuilder.maxGearscoreNumber = 10000;
 GroupBuilder.roles = {
     ["healer"] = {
         "resto",
+        "rseto",
+        "retso",
+
         "rsham",
-        "resto sh",
         "healer sha",
+        "healer sah",
         "heal sham",
         "hael sham",
+        "hael shma",
         "sham heal",
+        "shma heal",
         "shaman heal",
         "shamna heal",
 
@@ -22,6 +27,8 @@ GroupBuilder.roles = {
         "rdru",
         "tree",
         "haeler dru",
+        "hael dru",
+        "heal dru",
         "healre dru",
         "hael dru",
         "dru heal",
@@ -78,6 +85,7 @@ GroupBuilder.roles = {
 
         "enh",
         "enhance",
+        "ehnanc",
     
         "ret",
         "rte",
@@ -87,9 +95,9 @@ GroupBuilder.roles = {
         "fwar",
         "war dps",
         "warr dps",
-        "fuyr war",
-        "fruy war",
-        "fury war",
+        "fuyr",
+        "fruy",
+        "fury",
         "dps war",
 
         "unh",
@@ -111,26 +119,26 @@ GroupBuilder.roles = {
 
         "mage",
         "mag",
+        "maeg",
 
         "ele shaman",
         "elesham",
         "ele sham",
+        "eel sham",
 
         "warlock",
         "lock",
 
         "spr",
-        "shadow",
+        "shad",
+        "shda",
 
         "boom",
-        "moon",
-        "balance",
-        "boom",
         "booy",
-        "balance",
-        "balacn",
         "moon",
         "mono",
+        "balacn",
+        "balance",
     },
 };
 
@@ -164,12 +172,14 @@ GroupBuilder.classAbberviations = {
 
     ["mage"] = "MAGE",
     ["mag"] = "MAGE",
+    ["maeg"] = "MAGE",
 
     ["hunter"] = "HUNTER",
     ["hunt"] = "HUNTER",
+    ["hnt"] = "HUNTER",
+    ["hutn"] = "HUNTER",
     ["surv"] = "HUNTER",
     ["sruv"] = "HUNTER",
-    ["hnt"] = "HUNTER",
     ["mark"] = "HUNTER",
     ["bm"] = "HUNTER",
     ["beast"] = "HUNTER",
@@ -187,20 +197,20 @@ GroupBuilder.classAbberviations = {
 
     ["shaman"] = "SHAMAN",
     ["sham"] = "SHAMAN",
+    ["shma"] = "SHAMAN",
     ["ele"] = "SHAMAN",
     ["enh"] = "SHAMAN",
 
     ["boom"] = "DRUID",
     ["booy"] = "DRUID",
     ["balance"] = "DRUID",
-    ["balacn"] = "DRUID",
+    ["balac"] = "DRUID",
     ["moon"] = "DRUID",
     ["mono"] = "DRUID",
     ["feral"] = "DRUID",
     ["freal"] = "DRUID",
     ["rdriu"] = "DRUID",
     ["rdruid"] = "DRUID",
-    ["rdru"] = "DRUID",
     ["dru"] = "DRUID",
     ["druid"] = "DRUID",
     ["tree"] = "DRUID",
