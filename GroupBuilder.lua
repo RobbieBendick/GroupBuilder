@@ -29,8 +29,9 @@ function GroupBuilder:FindGearscore(message)
                 -- treat numbers below 1000 as decimals and multiply them by 1000
                 gearscoreNumber = gearscoreNumber * 1000;
             end
-            -- either a fake gs or was calculated wrong
-            if gearscoreNumber >= GroupBuilder.maxGearscoreNumber then
+            
+            -- either a fake gs, typo, or was calculated wrong
+            if gearscoreNumber and gearscoreNumber >= GroupBuilder.maxGearscoreNumber then
                 return nil;
             end
 
