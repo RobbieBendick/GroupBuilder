@@ -26,6 +26,7 @@ GroupBuilder.roles = {
         "rdrru",
         "rdruid",
         "rdru",
+        "rddru",
         "tree",
         "haeler dru",
         "hael dru",
@@ -140,20 +141,10 @@ GroupBuilder.roles = {
         "mono",
         "balacn",
         "balance",
-    },
-};
+        "blanc",
+        "baalnce",
 
-GroupBuilder.classes = {
-    "ROGUE",
-    "WARRIOR",
-    "PRIEST",
-    "MAGE", 
-    "PALADIN",
-    "HUNTER",
-    "DEATHKNIGHT",
-    "SHAMAN",
-    "WARLOCK",
-    "DRUID"
+    },
 };
 
 GroupBuilder.classAbberviations = {
@@ -168,6 +159,7 @@ GroupBuilder.classAbberviations = {
     ["dsi"] = "PRIEST",
     ["dics"] = "PRIEST",
     ["priest"] = "PRIEST",
+    ["preis"] = "PRIEST",
     ["pri"] = "PRIEST",
     ["dpr"] = "PRIEST",
 
@@ -206,12 +198,15 @@ GroupBuilder.classAbberviations = {
     ["booy"] = "DRUID",
     ["balance"] = "DRUID",
     ["balac"] = "DRUID",
+    ["blanc"] = "DRUID",
+    ["baalnce"] = "DRUID",
     ["moon"] = "DRUID",
     ["mono"] = "DRUID",
     ["feral"] = "DRUID",
     ["freal"] = "DRUID",
     ["rdriu"] = "DRUID",
     ["rdruid"] = "DRUID",
+    ["rddru"] = "DRUID",
     ["dru"] = "DRUID",
     ["druid"] = "DRUID",
     ["tree"] = "DRUID",
@@ -253,6 +248,19 @@ GroupBuilder.roleClasses = {
         "PRIEST",
         "DRUID",
     },
+};
+
+GroupBuilder.classes = {
+    "ROGUE",
+    "WARRIOR",
+    "PRIEST",
+    "MAGE", 
+    "PALADIN",
+    "HUNTER",
+    "DEATHKNIGHT",
+    "SHAMAN",
+    "WARLOCK",
+    "DRUID"
 };
 
 GroupBuilder.amountOfRaidBosses = {

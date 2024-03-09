@@ -61,10 +61,7 @@ function GroupBuilder:IcecrownCitadel25Template()
     GroupBuilder.db.profile["healerSHAMANMaximum"] = 2;
     GroupBuilder.db.profile["healerPALADINMaximum"] = 2;
     GroupBuilder.db.profile["healerDRUIDMaximum"] = 2;
-
     GroupBuilder.db.profile["tankDRUIDMaximum"] = 1;
-
-    GroupBuilder.db.profile["WARLOCKMinimum"] = 1;
 
 
     GroupBuilder:CheckForPlayerRole();
@@ -112,7 +109,7 @@ end
 
 function GroupBuilder:VaultOfArchavon25Template()
     GroupBuilder:ResetTemplate()
-    GroupBuilder.db.profile.minGearscore = 4000;
+    GroupBuilder.db.profile.minGearscore = 4500;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 4;
     GroupBuilder.db.profile.maxDPS = 15;
@@ -136,7 +133,7 @@ end
 
 function GroupBuilder:VaultOfArchavon10Template()
     GroupBuilder:ResetTemplate()
-    GroupBuilder.db.profile.minGearscore = 4000;
+    GroupBuilder.db.profile.minGearscore = 4500;
     GroupBuilder.db.profile.maxTanks = 2;
     GroupBuilder.db.profile.maxHealers = 3;
     GroupBuilder.db.profile.maxDPS = 5;

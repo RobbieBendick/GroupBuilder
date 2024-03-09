@@ -11,13 +11,13 @@ end
 
 function GroupBuilder:GetMaxNumPlayersNeededForRole(role)
     if role == "healer" then
-        return tonumber(GroupBuilder.db.profile.maxHealers) or 0
+        return tonumber(GroupBuilder.db.profile.maxHealers) or 0;
     elseif role == "tank" then
-        return tonumber(GroupBuilder.db.profile.maxTanks) or 0
+        return tonumber(GroupBuilder.db.profile.maxTanks) or 0;
     elseif role == "melee_dps" or role == "ranged_dps" then
-        return tonumber(GroupBuilder.db.profile.maxDPS) or 0
+        return tonumber(GroupBuilder.db.profile.maxDPS) or 0;
     else
-        return 0
+        return 0;
     end
 end
 

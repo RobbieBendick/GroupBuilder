@@ -107,13 +107,13 @@ function Config:GenerateClassTabs()
                     name = "Maximum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s",
                     desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If maximum is 0, the group won't fill that class)",
                     width = "normal",
+                    get = function(info)
+                        local classMax = className .. "Maximum";
+                        return tostring(GroupBuilder.db.profile[classMax] or "");
+                    end,
                     set = function(info, value)
                         local classMax = className .. "Maximum";
                         GroupBuilder.db.profile[classMax] = value;
-                    end,
-                    get = function(info)
-                        local classMax = className .. "Maximum";
-                        return GroupBuilder.db.profile[classMax];
                     end,
                 },
                 [className .. "Minimum"] = {
@@ -122,14 +122,13 @@ function Config:GenerateClassTabs()
                     name = "Minimum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s",
                     desc = "This option is to select the minmum number of " .. className:sub(1, 1) .. className:sub(2):lower() .. "s allowed in the raid.\n(If minimum is 3, the group won't fill until it reaches 3 Rogues)",
                     width = "normal",
+                    get = function(info)
+                        local classMin = className .. "Minimum";
+                        return tostring(GroupBuilder.db.profile[classMin] or "");
+                    end,
                     set = function(info, value)
                         local classMin = className .. "Minimum";
                         GroupBuilder.db.profile[classMin] = value;
-                        print('classMin is ', classMin)
-                    end,
-                    get = function(info)
-                        local classMin = className .. "Minimum";
-                        return GroupBuilder.db.profile[classMin];
                     end,
                 },
             },
