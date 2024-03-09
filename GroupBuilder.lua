@@ -5,7 +5,7 @@ function GroupBuilder:FindRole(message)
     local foundRole;
     for role, keyWords in pairs(GroupBuilder.roles) do
         for _, keyWord in ipairs(keyWords) do
-            if message:lower():find(keyWord) then
+            if message:find(keyWord) then
                 foundRole = role;
                 break;
             end
@@ -22,7 +22,7 @@ function GroupBuilder:FindGearscore(message)
     local gearscoreNumber;
 
     -- check for pattern with number followed by a role
-    for number, gsSuffix1, number2, gsSuffix2, role in message:lower():gmatch(keywordPatternWithGearscoreRole) do
+    for number, gsSuffix1, number2, gsSuffix2, role in message:gmatch(keywordPatternWithGearscoreRole) do
         if not string.find(role, "budg") then
             gearscoreNumber = tonumber(number) or tonumber(number2)
             if gearscoreNumber and gearscoreNumber < 1000 then
@@ -38,9 +38,9 @@ function GroupBuilder:FindGearscore(message)
         end
     end
 
-    -- Check for a number followed by a role without "gs" in between
+    -- check for a number followed by a role without "gs" in between
     local keywordPatternWithRole = "(%d*%.?%d*)%s*([kK]?)%s*(.-)";
-    for number, gsSuffix, role in message:lower():gmatch(keywordPatternWithRole) do
+    for number, gsSuffix, role in message:gmatch(keywordPatternWithRole) do
         if not string.find(role, "budg") then
             gearscoreNumber = tonumber(number);
             if gearscoreNumber and gearscoreNumber < 1000 then
