@@ -48,7 +48,7 @@ function GroupBuilder:FindGearscore(message)
                 gearscoreNumber = gearscoreNumber * 1000;
             end
 
-            -- either a fake gs or was calculated wrong
+            -- either a fake gs, typo, or was calculated wrong
             if gearscoreNumber and gearscoreNumber >= GroupBuilder.maxGearscoreNumber then
                 return nil;
             end
