@@ -121,7 +121,7 @@ end
 function GroupBuilder:SendDelayedMessage(message, characterName)
     local amountOfInteractionsBeforeStopping = 1;
     local interactedWithTooManyTimes = GroupBuilder.recentlyInteractedWith[characterName] and GroupBuilder.recentlyInteractedWith[characterName] >= amountOfInteractionsBeforeStopping;
-
+    print('rob')
     if interactedWithTooManyTimes then
         return;
     end
