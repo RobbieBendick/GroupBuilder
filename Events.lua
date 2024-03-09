@@ -224,7 +224,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         return;
     elseif onlyHaveGS then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].gearscore = gearscoreNumber;
-        GroupBuilder:SendDelayedMessage("gs?", whispererCharacterName);
+        GroupBuilder:SendDelayedMessage("spec & class?", whispererCharacterName);
         return;
     elseif onlyHaveClass then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].class = whispererClass;
@@ -232,7 +232,7 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         return;
     elseif onlyHaveRole then
         GroupBuilder.db.profile.inviteConstruction[whispererCharacterName].role = role;
-        GroupBuilder:SendDelayedMessage("spec & gs?", whispererCharacterName);
+        GroupBuilder:SendDelayedMessage("class & gs?", whispererCharacterName);
         return;
     end
 
