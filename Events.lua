@@ -129,6 +129,10 @@ function GroupBuilder:SendDelayedMessage(message, characterName)
     end);
 end
 
+function GroupBuilder:CheckMissingRequirementsAndReply(role, class, gearscore)
+    
+end
+
 function GroupBuilder:HandleWhispers(event, message, sender, ...)
     if GroupBuilder.db.profile.isPaused then return end
     message = message:lower();
@@ -379,62 +383,11 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
             GroupBuilder:RemovePlayerFromRaidTable(playerName);
         end
     end
+    GroupBuilder:UpdateGUI();
 end
 
 function GroupBuilder:HandleErrorMessages(event, msg)
     if not msg:find("is already in a group") then return end
     local playerName = msg:match("(%S+)");
     GroupBuilder.db.profile.invitedTable[playerName] = nil;
-end
-
-
-local defaults = {
-    profile = {
-        maxHealers = "",
-        maxDPS = "",
-        maxTanks = "",
-        maxRangedDPS = "",
-        maxMeleeDPS = "",
-        message = "",
-        minGearscore = "",
-        minimapCoords = {},
-        raidTable = {},
-        raidPlayersThatLeftGroup = {},
-        invitedTable = {},
-        inviteConstruction = {},
-        isPaused = true,
-        selectedRaidTemplate = "",
-        selectedRole = "",
-        selectedRaidType = "",
-        selectedSRRaidInfo = "",
-        selectedGDKPRaidInfo = "",
-        selectedAdvertisementRaid = "",
-        minPlayersForAdvertisingCount = 15,
-        constructMessageIsActive = false,
-        outOfMaxPlayers = "",
-    }
-};
-
-function GroupBuilder:OnInitialize()
-    -- initialize saved variables with defaults
-    GroupBuilder.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
-
-    C_Timer.After(1, function ()
-        if GetNumGroupMembers() == 0 then
-            GroupBuilder.db.profile.raidTable = {};
-            GroupBuilder.db.profile.invitedTable = {};
-            GroupBuilder.db.profile.inviteConstruction = {};
-            GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
-        end 
-    end);
-    
-    -- handle events
-    self:RegisterEvent("CHAT_MSG_WHISPER", "HandleWhispers");
-    self:RegisterEvent("GROUP_ROSTER_UPDATE", "HandleGroupRosterUpdate");
-    self:RegisterEvent("CHAT_MSG_SYSTEM", "HandleErrorMessages");
-
-    -- load config stuff
-    Config:LoadStaticPopups();
-    Config:CreateMinimapIcon();
-    Config:CreateMenu();
 end

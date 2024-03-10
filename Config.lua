@@ -15,9 +15,17 @@ local raidInstanceDropdownValues = {
     ["Reset"] = "Reset",
 };
 
-function Config:Toggle()
-    InterfaceOptionsFrame_OpenToCategory(GBConfig);
-    InterfaceOptionsFrame_OpenToCategory(GBConfig);
+function GroupBuilder:Toggle(button)
+    if button == "RightButton" then
+        InterfaceOptionsFrame_OpenToCategory(GBConfig);
+        InterfaceOptionsFrame_OpenToCategory(GBConfig);
+    elseif button == "LeftButton" then
+        if GroupBuilder.GUIFrame:IsShown() then
+            GroupBuilder.GUIFrame:Hide()
+        else
+            GroupBuilder.GUIFrame:Show()
+        end
+    end
 end
 
 function GroupBuilder:GetKeyByValue(tbl, value)
@@ -92,7 +100,7 @@ function GroupBuilder:IsClassNeededForMinimum(class)
     end
 end
 
-function Config:GenerateClassTabs()
+function GroupBuilder:GenerateClassTabs()
     local classTabs = {}
 
     for i, className in ipairs(GroupBuilder.classes) do
@@ -136,7 +144,7 @@ function Config:GenerateClassTabs()
     end
     return classTabs;
 end
-function Config:GenerateRoleTabs()
+function GroupBuilder:GenerateRoleTabs()
     local roleTabs = {};
     local i = 1;
     for roleName, keyWordList in pairs(GroupBuilder.roles) do
@@ -177,7 +185,7 @@ function Config:GenerateRoleTabs()
     return roleTabs;
 end
 
-function Config:CreateMenu()
+function GroupBuilder:CreateMenu()
     GBConfig = CreateFrame("Frame", "GroupBuilderConfig", UIParent);
 
     GBConfig.name = "GroupBuilder";
@@ -187,8 +195,8 @@ function Config:CreateMenu()
     GBConfig.title:SetPoint("TOPLEFT", 16, -16);
     GBConfig.title:SetText(GBConfig.name);
 
-    local classTabs = Config:GenerateClassTabs();
-    local roleTabs = Config:GenerateRoleTabs();
+    local classTabs = GroupBuilder:GenerateClassTabs();
+    local roleTabs = GroupBuilder:GenerateRoleTabs();
 
     local advertisementMessageOptions = {
         name = "Advertising Message",
@@ -560,7 +568,7 @@ function Config:CreateMenu()
                 inline = false,
                 descStyle = "inline",
                 childGroups = "tab",
-                name = "Class Specific",
+                name = "Class",
                 args = classTabs,
             },
             rolesAndClassesTabGroup = {
@@ -569,7 +577,7 @@ function Config:CreateMenu()
                 inline = false,
                 descStyle = "inline",
                 childGroups = "tab",
-                name = "Role And Class Specific",
+                name = "Role & Class",
                 args = roleTabs,
             },
 
@@ -612,7 +620,7 @@ function Config:CreateMenu()
     GBConfig:Hide();
 end
 
-function Config:IsInTrade()
+function GroupBuilder:IsInTrade()
     for i = 1, GetNumDisplayChannels() do
         local id, channelName = GetChannelName(i)
         if channelName then
@@ -624,7 +632,7 @@ function Config:IsInTrade()
     return false;
 end
 
-function Config:IsInLookingForGroup()
+function GroupBuilder:IsInLookingForGroup()
     for i = 1, GetNumDisplayChannels() do
         local id, channelName = GetChannelName(i)
         if channelName == "LookingForGroup" then
@@ -634,7 +642,7 @@ function Config:IsInLookingForGroup()
     return false;
 end
 
-function Config:FindLFGChannelIndex()
+function GroupBuilder:FindLFGChannelIndex()
     for i = 1, GetNumDisplayChannels() do
         local id, channelName = GetChannelName(i);
         if channelName == "LookingForGroup" then
@@ -644,7 +652,7 @@ function Config:FindLFGChannelIndex()
     return nil;
 end
 
-function Config:FindTradeChannelIndex()
+function GroupBuilder:FindTradeChannelIndex()
     for i = 1, GetNumDisplayChannels() do
         local id, channelName = GetChannelName(i);
         if channelName then
@@ -668,7 +676,7 @@ function GroupBuilder:FindTotalMinimumOfMissingClasses()
 end
 
 
-function Config:CreateAdvertisementMessage()
+function GroupBuilder:CreateAdvertisementMessage()
     if not GroupBuilder.db.profile.selectedAdvertisementRaid then 
         return GroupBuilder:Print("Please select an advertisement raid in the Advertising Message options.");
     end
@@ -728,13 +736,13 @@ end
 
 function AdvertiseLFG()
     if GroupBuilder.db.profile.constructMessageIsActive then
-        return Config:CreateAdvertisementMessage();
+        return GroupBuilder:CreateAdvertisementMessage();
     end
     if GroupBuilder.db.profile.message == "" then
         return print("Please enter an advertisement message.");
     end
-    if Config:IsInLookingForGroup() then
-        local lookingForGroupChannelID = Config:FindLFGChannelIndex();
+    if GroupBuilder:IsInLookingForGroup() then
+        local lookingForGroupChannelID = GroupBuilder:FindLFGChannelIndex();
         SendChatMessage(GroupBuilder.db.profile.message, "CHANNEL", nil, lookingForGroupChannelID);
     else
         ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, "LookingForGroup");
@@ -749,14 +757,14 @@ end
 
 function AdvertiseTrade()
     if GroupBuilder.db.profile.constructMessageIsActive then
-        return Config:CreateAdvertisementMessage();
+        return GroupBuilder:CreateAdvertisementMessage();
     end
     if not GroupBuilder.db.profile.message then 
         return print("Please enter an advertisement message.");
     end
 
-    if Config:IsInTrade() then
-        local tradeChannelID = Config:FindTradeChannelIndex();
+    if GroupBuilder:IsInTrade() then
+        local tradeChannelID = GroupBuilder:FindTradeChannelIndex();
         SendChatMessage(GroupBuilder.db.profile.message, "CHANNEL", nil, tradeChannelID);
     else
         print("Advertisement failed because you're not in the Trade channel.");
@@ -767,13 +775,14 @@ function AdvertiseTrade()
     end
 end
 
-function Config:CreateMinimapIcon()
+function GroupBuilder:CreateMinimapIcon()
     LibDBIcon:Register(GroupBuilder.addonName, {
         icon = "Interface\\GROUPFRAME\\UI-Group-LeaderIcon",
         OnClick = self.Toggle,
         OnTooltipShow = function(tt)
-            tt:AddLine(GroupBuilder.addonName .. " |cff808080" .. GetAddOnMetadata(GroupBuilder.addonName, "Version"));
-            tt:AddLine("|cffCCCCCCClick|r to open options");
+            tt:AddLine(self.addonName .. " |cff808080" .. GetAddOnMetadata(self.addonName, "Version"));
+            tt:AddLine("|cffCCCCCCClick|r to open the Raid Representation");
+            tt:AddLine("|cffCCCCCCRight Click|r to open options");
             tt:AddLine("|cffCCCCCCDrag|r to move this button");
         end,
         text = GroupBuilder.addonName,
@@ -781,10 +790,10 @@ function Config:CreateMinimapIcon()
     });
 
     C_Timer.After(0.25, function ()
-        if GroupBuilder.db.profile.minimapCoords and #GroupBuilder.db.profile.minimapCoords > 0 then
-            LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetPoint(unpack(GroupBuilder.db.profile.minimapCoords));
+        if self.db.profile.minimapCoords and #self.db.profile.minimapCoords > 0 then
+            LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetPoint(unpack(self.db.profile.minimapCoords));
         end
-        LibDBIcon:GetMinimapButton(GroupBuilder.addonName):SetScript("OnDragStop", function (self)
+        LibDBIcon:GetMinimapButton(self.addonName):SetScript("OnDragStop", function (self)
             self:SetScript("OnUpdate", nil);
             self.isMouseDown = false;
             self.icon:UpdateCoord();
@@ -796,7 +805,7 @@ function Config:CreateMinimapIcon()
     end);
 end
 
-function Config:LoadStaticPopups()
+function GroupBuilder:LoadStaticPopups()
     StaticPopupDialogs["NOT_IN_LFG"] = {
         text = "You weren't previously in the LFG channel. Resend your advertisement?",
         button1 = "Send Advertisement",
@@ -825,3 +834,55 @@ function Config:LoadStaticPopups()
     };
 end
 
+
+
+local defaults = {
+    profile = {
+        maxHealers = "",
+        maxDPS = "",
+        maxTanks = "",
+        maxRangedDPS = "",
+        maxMeleeDPS = "",
+        message = "",
+        minGearscore = "",
+        minimapCoords = {},
+        raidTable = {},
+        raidPlayersThatLeftGroup = {},
+        invitedTable = {},
+        inviteConstruction = {},
+        isPaused = true,
+        selectedRaidTemplate = "",
+        selectedRole = "",
+        selectedRaidType = "",
+        selectedSRRaidInfo = "",
+        selectedGDKPRaidInfo = "",
+        selectedAdvertisementRaid = "",
+        minPlayersForAdvertisingCount = 15,
+        constructMessageIsActive = false,
+        outOfMaxPlayers = "",
+    }
+};
+
+function GroupBuilder:OnInitialize()
+    -- initialize saved variables with defaults
+    GroupBuilder.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
+
+    C_Timer.After(1, function ()
+        if GetNumGroupMembers() == 0 then
+            GroupBuilder.db.profile.raidTable = {};
+            GroupBuilder.db.profile.invitedTable = {};
+            GroupBuilder.db.profile.inviteConstruction = {};
+            GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
+        end 
+    end);
+    
+    -- handle events
+    self:RegisterEvent("CHAT_MSG_WHISPER", "HandleWhispers");
+    self:RegisterEvent("GROUP_ROSTER_UPDATE", "HandleGroupRosterUpdate");
+    self:RegisterEvent("CHAT_MSG_SYSTEM", "HandleErrorMessages");
+
+    -- load config stuff
+    GroupBuilder:LoadStaticPopups();
+    GroupBuilder:CreateMinimapIcon();
+    GroupBuilder:CreateMenu();
+end
