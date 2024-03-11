@@ -23,13 +23,13 @@ function GroupBuilder:FindGearscore(message)
 
     -- check for pattern with number followed by a role
     for number, gsSuffix1, number2, gsSuffix2, role in message:gmatch(keywordPatternWithGearscoreRole) do
-        if not string.find(role, "budg") then
+        if not role:find("budg") then
             gearscoreNumber = tonumber(number) or tonumber(number2);
             if gearscoreNumber and gearscoreNumber < 1000 then
                 -- treat numbers below 1000 as decimals and multiply them by 1000
                 gearscoreNumber = gearscoreNumber * 1000;
             end
-            
+
             -- either a fake gs, typo, or was calculated wrong
             if gearscoreNumber and gearscoreNumber >= GroupBuilder.maxGearscoreNumber then
                 return nil;
@@ -42,7 +42,7 @@ function GroupBuilder:FindGearscore(message)
     -- check for a number followed by a role without "gs" in between
     local keywordPatternWithRole = "(%d*%.?%d*)%s*([kK]?)%s*(.-)";
     for number, gsSuffix, role in message:gmatch(keywordPatternWithRole) do
-        if not string.find(role, "budg") then
+        if not role:find("budg") then
             gearscoreNumber = tonumber(number);
             if gearscoreNumber and gearscoreNumber < 1000 then
                 -- treat numbers below 1000 as decimals and multiply them by 1000

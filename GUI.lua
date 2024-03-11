@@ -31,7 +31,7 @@ local function CreatePlayerWidget(playerName, playerData)
     playerNameLabel:SetText(playerNameText);
     playerNameLabel:SetRelativeWidth(0.2);
 
-    local classIcon = "|TInterface\\icons\\ClassIcon_" .. string.upper(playerData.class) .. ":20:20|t";
+    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t";
     local classIconLabel = AceGUI:Create("Label");
     classIconLabel:SetText(classIcon);
     classIconLabel:SetRelativeWidth(0.1);
@@ -64,10 +64,6 @@ function GroupBuilder:UpdateGUI()
     healerGroup:SetTitle("Healers " .. GroupBuilder:CreateCounterLabel(healerCount, GroupBuilder.db.profile.maxHealers));
     dpsGroup:SetTitle("DPS " .. GroupBuilder:CreateCounterLabel(dpsCount, GroupBuilder.db.profile.maxDPS));
 
-    local tankEmpty = true;
-    local healerEmpty = true;
-    local dpsEmpty = true;
-
     if GroupBuilder.db.profile.raidTable then
         for playerName, playerData in pairs(GroupBuilder.db.profile.raidTable) do
             local playerInfoWidget = CreatePlayerWidget(playerName, playerData);
@@ -75,32 +71,29 @@ function GroupBuilder:UpdateGUI()
             
             if playerData.role == "tank" then
                 tankGroup:AddChild(playerInfoWidget);
-                tankEmpty = false;
             elseif playerData.role == "ranged_dps" or playerData.role == "melee_dps" then
                 dpsGroup:AddChild(playerInfoWidget);
-                dpsEmpty = false;
             elseif playerData.role == "healer" then
                 healerGroup:AddChild(playerInfoWidget);
-                healerEmpty = false;
             end
         end
     end
 
-    if tankEmpty then
+    if GroupBuilder:CountPlayersByRole("tank") == 0 then
         local tankLabel = AceGUI:Create("Label");
         tankLabel:SetText("Group doesn't have any tanks");
         tankLabel:SetFullWidth(true);
         tankGroup:AddChild(tankLabel);
     end
 
-    if healerEmpty then
+    if GroupBuilder:CountPlayersByRole("healer") == 0 then
         local healerLabel = AceGUI:Create("Label");
         healerLabel:SetText("Group doesn't have any healers");
         healerLabel:SetFullWidth(true);
         healerGroup:AddChild(healerLabel);
     end
 
-    if dpsEmpty then
+    if GroupBuilder:CountPlayersByRole("dps") == 0 then
         local dpsLabel = AceGUI:Create("Label");
         dpsLabel:SetText("Group doesn't have any DPS");
         dpsLabel:SetFullWidth(true);
