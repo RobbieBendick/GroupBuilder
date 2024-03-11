@@ -77,6 +77,7 @@ function GroupBuilder:IcecrownCitadel10Template()
     GroupBuilder.db.profile.maxMeleeDPS = 4;
     GroupBuilder.db.profile.minGearscore = 5400;
     GroupBuilder.db.profile.maxTotalPlayers = 10;
+    
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end
@@ -103,6 +104,7 @@ function GroupBuilder:RubySanctum25Template()
     GroupBuilder.db.profile.maxMeleeDPS = 10;
     GroupBuilder.db.profile.minGearscore = 5600;
     GroupBuilder.db.profile.maxTotalPlayers = 25;
+
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
 end

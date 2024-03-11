@@ -54,7 +54,7 @@ function GroupBuilder:FindClassCount(class)
 end
 
 
-function GroupBuilder:CountPlayersByRole(table, role)
+function GroupBuilder:CountPlayersByRole( role)
     local count = 0;
     if role == "dps" then
         for _, playerData in pairs(GroupBuilder.db.profile.raidTable) do
@@ -62,8 +62,18 @@ function GroupBuilder:CountPlayersByRole(table, role)
                 count = count + 1;
             end
         end
+        for _, playerData in pairs(GroupBuilder.db.profile.invitedTable) do
+            if playerData.role == "melee_dps" or playerData.role == "ranged_dps" then
+                count = count + 1;
+            end
+        end
     else
         for _, playerData in pairs(GroupBuilder.db.profile.raidTable) do
+            if playerData.role == role then
+                count = count + 1;
+            end
+        end
+        for _, playerData in pairs(GroupBuilder.db.profile.invitedTable) do
             if playerData.role == role then
                 count = count + 1;
             end
@@ -477,6 +487,7 @@ function GroupBuilder:CreateMenu()
                         },
                         set = function(info, value)
                             GroupBuilder.db.profile.maxTotalPlayers = tonumber(value);
+                            GroupBuilder:UpdateGUI();
                         end,
                         get = function(info)
                             return tostring(GroupBuilder.db.profile.maxTotalPlayers);
@@ -490,6 +501,7 @@ function GroupBuilder:CreateMenu()
                         width = "half",
                         set = function(info, value) 
                             GroupBuilder.db.profile.maxTanks = tonumber(value);
+                            GroupBuilder:UpdateGUI();
                         end,
                         get = function(info) 
                             return tostring(GroupBuilder.db.profile.maxTanks or "");
@@ -503,6 +515,7 @@ function GroupBuilder:CreateMenu()
                         width = "half",
                         set = function(info, value) 
                             GroupBuilder.db.profile.maxHealers = tonumber(value);
+                            GroupBuilder:UpdateGUI();
                         end,
                         get = function(info) 
                             return tostring(GroupBuilder.db.profile.maxHealers or "");
@@ -516,6 +529,7 @@ function GroupBuilder:CreateMenu()
                         width = "half",
                         set = function(info, value) 
                             GroupBuilder.db.profile.maxDPS = tonumber(value);
+                            GroupBuilder:UpdateGUI();
                         end,
                         get = function(info) 
                             return tostring(GroupBuilder.db.profile.maxDPS or "");
@@ -529,6 +543,7 @@ function GroupBuilder:CreateMenu()
                         width = "half",
                         set = function(info, value) 
                             GroupBuilder.db.profile.maxRangedDPS = tonumber(value);
+                            GroupBuilder:UpdateGUI();
                         end,
                         get = function(info) 
                             return tostring(GroupBuilder.db.profile.maxRangedDPS or "");
@@ -542,6 +557,7 @@ function GroupBuilder:CreateMenu()
                         width = "half",
                         set = function(info, value) 
                             GroupBuilder.db.profile.maxMeleeDPS = tonumber(value);
+                            GroupBuilder:UpdateGUI();
                         end,
                         get = function(info) 
                             return tostring(GroupBuilder.db.profile.maxMeleeDPS or "");
@@ -781,7 +797,7 @@ function GroupBuilder:CreateMinimapIcon()
         OnClick = self.Toggle,
         OnTooltipShow = function(tt)
             tt:AddLine(self.addonName .. " |cff808080" .. GetAddOnMetadata(self.addonName, "Version"));
-            tt:AddLine("|cffCCCCCCClick|r to open the Raid Representation");
+            tt:AddLine("|cffCCCCCCLeft Click|r to open the Raid Representation");
             tt:AddLine("|cffCCCCCCRight Click|r to open options");
             tt:AddLine("|cffCCCCCCDrag|r to move this button");
         end,
@@ -874,8 +890,15 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.inviteConstruction = {};
             GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         end
-        GroupBuilder:UpdateGUI()
+        GroupBuilder.db.profile.raidTable["Floydsr"] = {
+            ["class"] = "MAGE",
+            ["role"] = "ranged_dps",
+            ["gearscore"] = "5500",
+        }
+        GroupBuilder:UpdateGUI();
     end);
+
+
     
     -- handle events
     self:RegisterEvent("CHAT_MSG_WHISPER", "HandleWhispers");
