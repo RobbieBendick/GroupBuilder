@@ -6,6 +6,7 @@ GroupBuilder.minDelayTime = 4;
 GroupBuilder.maxDelayTime = 10;
 GroupBuilder.maxGearscoreNumber = 10000;
 GroupBuilder.amountOfInteractionsBeforeStoppingWhispers = 1;
+GroupBuilder.selectedKickPlayer = "";
 GroupBuilder.roles = {
     ["healer"] = {
         "resto",

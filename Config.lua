@@ -848,6 +848,25 @@ function GroupBuilder:LoadStaticPopups()
             StaticPopup_Hide("NOT_IN_TRADE");
         end
     };
+
+    StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"] = {
+        text = "Are you sure you want to kick this player from the raid?",
+        button1 = "Kick",
+        button2 = "Cancel",
+        timeout = 120,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = STATICPOPUP_NUMDIALOGS,
+        OnAccept = function ()
+            UninviteUnit(GroupBuilder.db.profile.selectedKickPlayer);
+            GroupBuilder.db.profile.raidTable[GroupBuilder.db.profile.selectedKickPlayer] = nil;
+            GroupBuilder.db.profile.inviteConstruction[GroupBuilder.db.profile.selectedKickPlayer] = nil;
+            GroupBuilder.UpdateGUI();
+        end,
+        OnCancel = function ()
+            StaticPopup_Hide("ARE_YOU_SURE_YOU_WANT_TO_KICK");
+        end
+    };
 end
 
 
@@ -885,16 +904,16 @@ function GroupBuilder:OnInitialize()
 
     C_Timer.After(1, function ()
         -- if GetNumGroupMembers() == 0 then
-            -- GroupBuilder.db.profile.raidTable = {};
-            -- GroupBuilder.db.profile.invitedTable = {};
-            -- GroupBuilder.db.profile.inviteConstruction = {};
-            -- GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
+        --     GroupBuilder.db.profile.raidTable = {};
+        --     GroupBuilder.db.profile.invitedTable = {};
+        --     GroupBuilder.db.profile.inviteConstruction = {};
+        --     GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         -- end
-        -- GroupBuilder.db.profile.raidTable["Floydsr"] = {
-        --     ["role"] = "ranged_dps",
-        --     ["class"] = "MAGE",
-        --     ["gearscore"] = "5500",
-        -- }
+        GroupBuilder.db.profile.raidTable["Floydsr"] = {
+            ["role"] = "ranged_dps",
+            ["class"] = "MAGE",
+            ["gearscore"] = "5500",
+        }
         GroupBuilder:UpdateGUI();
     end);
     
