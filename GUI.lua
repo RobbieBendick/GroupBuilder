@@ -26,13 +26,99 @@ function GroupBuilder:CreateMargin()
     margin:SetRelativeWidth(0.1);
     return margin;
 end
+local function CreateAddPlayerDialog()
+    local dialog = AceGUI:Create("Frame");
+    dialog:SetTitle("Add Player");
+    dialog:SetLayout("Flow");
+
+    local playerNameEditBox = AceGUI:Create("EditBox");
+    playerNameEditBox:SetLabel("Player Name");
+    playerNameEditBox:SetFullWidth(true);
+    dialog:AddChild(playerNameEditBox);
+
+    local roleDropdown = AceGUI:Create("Dropdown");
+    roleDropdown:SetLabel("Role");
+    roleDropdown:SetList({
+        tank = "Tank",
+        healer = "Healer",
+        melee_dps = "Melee",
+        ranged_dps = "Ranged"
+    });
+    roleDropdown:SetFullWidth(true);
+    dialog:AddChild(roleDropdown);
+
+    local classDropdown = AceGUI:Create("Dropdown");
+    classDropdown:SetLabel("Class");
+    classDropdown:SetList({
+        ["ROGUE"] = "Rogue",
+        ["WARRIOR"] = "Warrior",
+        ["PRIEST"] = "Priest",
+        ["MAGE"] = "Mage", 
+        ["PALADIN"] = "Paladin",
+        ["HUNTER"] = "Hunter",
+        ["DEATHKNIGHT"] = "Deathknight",
+        ["SHAMAN"] = "Shaman",
+        ["WARLOCK"] = "Warlock",
+        ["DRUID"] = "Druid",
+    });
+    classDropdown:SetFullWidth(true);
+    dialog:AddChild(classDropdown);
+    
+    local gearscoreEditBox = AceGUI:Create("EditBox");
+    gearscoreEditBox:SetLabel("Gearscore");
+    gearscoreEditBox:SetFullWidth(true);
+    dialog:AddChild(gearscoreEditBox);
+
+    local addButton = AceGUI:Create("Button");
+    addButton:SetText("Add Player");
+    addButton:SetRelativeWidth(1);
+    addButton:SetCallback("OnClick", function()
+        local playerName = playerNameEditBox:GetText():sub(1,1):upper() .. playerNameEditBox:GetText():sub(2):lower();
+        local role = roleDropdown:GetValue();
+        local class = classDropdown:GetValue();
+        local gearscore = tonumber(gearscoreEditBox:GetText()) or 0;
+
+        if playerName == "" or not role or not class or not gearscore then
+            return;
+        end
+        
+        GroupBuilder.db.profile.raidTable[playerName] = {
+            ["class"] = class,
+            ["role"] = role,
+            ["gearscore"] = gearscore,
+        };
+
+        GroupBuilder:UpdateGUI();
+
+        dialog:Hide();
+    end)
+    dialog:AddChild(addButton);
+
+    return dialog;
+end
+
+local function ShowAddPlayerDialog()
+    local dialog = CreateAddPlayerDialog()
+    dialog:SetCallback("OnClose", function(widget)
+        AceGUI:Release(widget);
+    end)
+    dialog:SetWidth(350);
+    dialog:SetHeight(275);
+    dialog:SetLayout("List");
+    dialog:Show();
+    dialog:DoLayout();
+end
+
+local addPlayerButton = AceGUI:Create("Button");
+addPlayerButton:SetText("Add Player");
+addPlayerButton:SetCallback("OnClick", ShowAddPlayerDialog);
 
 local function CreatePlayerWidget(playerName, playerData)
     local group = AceGUI:Create("SimpleGroup");
     group:SetFullWidth(true);
 
     local playerNameLabel = AceGUI:Create("Label");
-    local classColor = RAID_CLASS_COLORS[playerData.class].colorStr;
+    local classColor = RAID_CLASS_COLORS[playerData.class:upper()].colorStr;
     local playerNameText = "|c" .. classColor .. playerName .. "|r";
     local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t";
 
@@ -136,5 +222,11 @@ function GroupBuilder:UpdateGUI()
     
     GroupBuilder.GUIFrame:DoLayout();
 end
+
+local addPlayerButton = AceGUI:Create("Button")
+addPlayerButton:SetText("Add Player")
+addPlayerButton:SetCallback("OnClick", ShowAddPlayerDialog)
+
+GroupBuilder.GUIFrame:AddChild(addPlayerButton)
 
 GroupBuilder.GUIFrame:Hide();

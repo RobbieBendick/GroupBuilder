@@ -41,12 +41,12 @@ function GroupBuilder:FindClassCount(class)
     if not class then return end
     local count = 0;
     for characterName, characterData in pairs(GroupBuilder.db.profile.raidTable) do
-        if characterData.class == class then
+        if characterData.class:lower() == class:lower() then
             count = count + 1;
         end
     end
     for characterName, characterData in pairs(GroupBuilder.db.profile.invitedTable) do
-        if characterData.class == class then
+        if characterData.class:lower() == class:lower() then
             count = count + 1;
         end
     end
@@ -86,12 +86,12 @@ function GroupBuilder:CountPlayersByRoleAndClass(role, class)
     if not role or not class then return end
     local count = 0;
     for characterName, characterData in pairs(GroupBuilder.db.profile.raidTable) do
-        if characterData.role == role and characterData.class == class then
+        if characterData.role == role and characterData.class:lower() == class:lower() then
             count = count + 1;
         end
     end
     for characterName, characterData in pairs(GroupBuilder.db.profile.invitedTable) do
-        if characterData.role == role and characterData.class == class then
+        if characterData.role == role and characterData.class:lower() == class:lower() then
             count = count + 1;
         end
     end
@@ -848,7 +848,6 @@ function GroupBuilder:LoadStaticPopups()
             StaticPopup_Hide("NOT_IN_TRADE");
         end
     };
-
     StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"] = {
         text = "Are you sure you want to kick this player from the raid?",
         button1 = "Kick",
@@ -897,12 +896,12 @@ function GroupBuilder:OnInitialize()
     GroupBuilder.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
 
     C_Timer.After(1, function ()
-        -- if GetNumGroupMembers() == 0 then
-        --     GroupBuilder.db.profile.raidTable = {};
-        --     GroupBuilder.db.profile.invitedTable = {};
-        --     GroupBuilder.db.profile.inviteConstruction = {};
-        --     GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
-        -- end
+        if GetNumGroupMembers() == 0 then
+            GroupBuilder.db.profile.raidTable = {};
+            GroupBuilder.db.profile.invitedTable = {};
+            GroupBuilder.db.profile.inviteConstruction = {};
+            GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
+        end
         GroupBuilder.db.profile.raidTable["Floydsr"] = {
             ["role"] = "ranged_dps",
             ["class"] = "MAGE",

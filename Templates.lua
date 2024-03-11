@@ -93,6 +93,7 @@ function GroupBuilder:RubySanctum10Template()
     GroupBuilder.db.profile.maxMeleeDPS = 4;
     GroupBuilder.db.profile.minGearscore = 5400;
     GroupBuilder.db.profile.maxTotalPlayers = 10;
+
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
     GroupBuilder:UpdateGUI();
@@ -123,7 +124,6 @@ function GroupBuilder:VaultOfArchavon25Template()
     GroupBuilder.db.profile.maxRangedDPS = "";
 
     GroupBuilder.db.profile.maxTotalPlayers = 25;
-
 
     -- set 1 for each role/class pair
     for roleName in pairs(GroupBuilder.roles) do
