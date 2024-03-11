@@ -857,12 +857,6 @@ function GroupBuilder:LoadStaticPopups()
         whileDead = true,
         hideOnEscape = true,
         preferredIndex = STATICPOPUP_NUMDIALOGS,
-        OnAccept = function ()
-            UninviteUnit(GroupBuilder.db.profile.selectedKickPlayer);
-            GroupBuilder.db.profile.raidTable[GroupBuilder.db.profile.selectedKickPlayer] = nil;
-            GroupBuilder.db.profile.inviteConstruction[GroupBuilder.db.profile.selectedKickPlayer] = nil;
-            GroupBuilder.UpdateGUI();
-        end,
         OnCancel = function ()
             StaticPopup_Hide("ARE_YOU_SURE_YOU_WANT_TO_KICK");
         end

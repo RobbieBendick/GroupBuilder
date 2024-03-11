@@ -61,9 +61,14 @@ local function CreatePlayerWidget(playerName, playerData)
     kickButton:SetText("Kick");
     kickButton:SetWidth(60);
     kickButton:SetCallback("OnClick", function()
-        StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"].text = "Are you sure you want to kick " .. playerName .. " from the raid?",
+        StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"].text = "Are you sure you want to kick " .. playerName .. " from the raid?";
+        StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"].OnAccept = function ()
+            UninviteUnit(playerName);
+            GroupBuilder.db.profile.raidTable[playerName] = nil;
+            GroupBuilder.db.profile.inviteConstruction[playerName] = nil;
+            GroupBuilder:UpdateGUI();
+        end
         StaticPopup_Show("ARE_YOU_SURE_YOU_WANT_TO_KICK");
-        GroupBuilder.UpdateGUI();
     end);
 
     group:AddChild(playerNameLabel);
