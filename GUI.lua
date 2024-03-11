@@ -60,9 +60,9 @@ function GroupBuilder:UpdateGUI()
     local healerCount = GroupBuilder:CountPlayersByRole("healer");
     local dpsCount = GroupBuilder:CountPlayersByRole("dps");
 
-    tankGroup:SetTitle("Tanks " .. GroupBuilder:CreateCounterLabel(tankCount, GroupBuilder.db.profile.maxTanks));
-    healerGroup:SetTitle("Healers " .. GroupBuilder:CreateCounterLabel(healerCount, GroupBuilder.db.profile.maxHealers));
-    dpsGroup:SetTitle("DPS " .. GroupBuilder:CreateCounterLabel(dpsCount, GroupBuilder.db.profile.maxDPS));
+    tankGroup:SetTitle("Tanks " .. GroupBuilder:CreateCounterLabel(tankCount, (GroupBuilder.db.profile.selectedRole == "tank" and GroupBuilder.db.profile.maxTanks + 1) or GroupBuilder.db.profile.maxTanks));
+    healerGroup:SetTitle("Healers " .. GroupBuilder:CreateCounterLabel(healerCount, (GroupBuilder.db.profile.selectedRole == "healer" and GroupBuilder.db.profile.maxHealers + 1) or GroupBuilder.db.profile.maxHealers));
+    dpsGroup:SetTitle("DPS " .. GroupBuilder:CreateCounterLabel(dpsCount, ( (GroupBuilder.db.profile.selectedRole == "ranged_dps" or GroupBuilder.db.profile.selectedRole == "melee_dps") and GroupBuilder.db.profile.maxDPS + 1) or GroupBuilder.db.profile.maxDPS));
 
     if GroupBuilder.db.profile.raidTable then
         for playerName, playerData in pairs(GroupBuilder.db.profile.raidTable) do
@@ -101,7 +101,4 @@ function GroupBuilder:UpdateGUI()
     end
 end
 
-
-
 GroupBuilder.GUIFrame:Hide();
-
