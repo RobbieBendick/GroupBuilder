@@ -873,7 +873,8 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.invitedTable = {};
             GroupBuilder.db.profile.inviteConstruction = {};
             GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
-        end 
+        end
+        GroupBuilder:UpdateGUI()
     end);
     
     -- handle events
