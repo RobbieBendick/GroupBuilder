@@ -66,6 +66,7 @@ function GroupBuilder:IcecrownCitadel25Template()
 
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+    GroupBuilder:UpdateGUI();
 end
 
 function GroupBuilder:IcecrownCitadel10Template()
@@ -77,9 +78,10 @@ function GroupBuilder:IcecrownCitadel10Template()
     GroupBuilder.db.profile.maxMeleeDPS = 4;
     GroupBuilder.db.profile.minGearscore = 5400;
     GroupBuilder.db.profile.maxTotalPlayers = 10;
-    
+
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+    GroupBuilder:UpdateGUI();
 end
 
 function GroupBuilder:RubySanctum10Template()
@@ -93,6 +95,7 @@ function GroupBuilder:RubySanctum10Template()
     GroupBuilder.db.profile.maxTotalPlayers = 10;
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+    GroupBuilder:UpdateGUI();
 end
 
 function GroupBuilder:RubySanctum25Template()
@@ -107,6 +110,7 @@ function GroupBuilder:RubySanctum25Template()
 
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+    GroupBuilder:UpdateGUI();
 end
 
 function GroupBuilder:VaultOfArchavon25Template()
@@ -131,6 +135,7 @@ function GroupBuilder:VaultOfArchavon25Template()
     end
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+    GroupBuilder:UpdateGUI();
 end
 
 function GroupBuilder:VaultOfArchavon10Template()
@@ -155,6 +160,7 @@ function GroupBuilder:VaultOfArchavon10Template()
 
     GroupBuilder:CheckForPlayerRole();
     AceConfigRegistry:NotifyChange(GroupBuilder.addonName);
+    GroupBuilder:UpdateGUI();
 end
 
 

@@ -7,9 +7,9 @@
 ## SavedVariables: GroupBuilderDB
 embeds.xml
 Constants.lua
-Templates.lua
 
 Config.lua
 GUI.lua
+Templates.lua
 Events.lua
 GroupBuilder.lua

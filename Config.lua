@@ -890,15 +890,8 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.inviteConstruction = {};
             GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         end
-        GroupBuilder.db.profile.raidTable["Floydsr"] = {
-            ["class"] = "MAGE",
-            ["role"] = "ranged_dps",
-            ["gearscore"] = "5500",
-        }
         GroupBuilder:UpdateGUI();
     end);
-
-
     
     -- handle events
     self:RegisterEvent("CHAT_MSG_WHISPER", "HandleWhispers");
