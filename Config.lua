@@ -902,11 +902,6 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.inviteConstruction = {};
             GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         end
-        GroupBuilder.db.profile.raidTable["Floydsr"] = {
-            ["role"] = "ranged_dps",
-            ["class"] = "MAGE",
-            ["gearscore"] = "5500",
-        }
         GroupBuilder:UpdateGUI();
     end);
     
