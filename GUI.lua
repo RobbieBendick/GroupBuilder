@@ -1,24 +1,37 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local AceGUI = LibStub("AceGUI-3.0");
 
+
+
+
+
+local mainScrollFrame = AceGUI:Create("ScrollFrame")
+mainScrollFrame:SetFullWidth(true)
+mainScrollFrame:SetFullHeight(true)
+
 GroupBuilder.GUIFrame = AceGUI:Create("Frame");
 GroupBuilder.GUIFrame:SetTitle("Raid Group Representation");
-GroupBuilder.GUIFrame:SetLayout("Flow");
+GroupBuilder.GUIFrame:SetLayout("Fill")
+GroupBuilder.GUIFrame:AddChild(mainScrollFrame)
 
 local tankGroup = AceGUI:Create("InlineGroup");
+tankGroup:SetLayout("Flow")
 tankGroup:SetFullWidth(true);
 tankGroup:SetTitle("Tanks");
-GroupBuilder.GUIFrame:AddChild(tankGroup);
+mainScrollFrame:AddChild(tankGroup);
 
 local healerGroup = AceGUI:Create("InlineGroup");
+healerGroup:SetLayout("Flow")
+
 healerGroup:SetFullWidth(true);
 healerGroup:SetTitle("Healers");
-GroupBuilder.GUIFrame:AddChild(healerGroup);
+mainScrollFrame:AddChild(healerGroup);
 
 local dpsGroup = AceGUI:Create("InlineGroup");
+dpsGroup:SetLayout("Flow")
 dpsGroup:SetFullWidth(true);
 dpsGroup:SetTitle("DPS");
-GroupBuilder.GUIFrame:AddChild(dpsGroup);
+mainScrollFrame:AddChild(dpsGroup);
 
 function GroupBuilder:CreateMargin()
     local margin = AceGUI:Create("Label");
@@ -114,58 +127,64 @@ addPlayerButton:SetText("Add Player");
 addPlayerButton:SetCallback("OnClick", ShowAddPlayerDialog);
 
 local function CreatePlayerWidget(playerName, playerData)
-    local group = AceGUI:Create("SimpleGroup");
-    group:SetFullWidth(true);
+    local playerGroup = AceGUI:Create("InlineGroup");
+    playerGroup:SetWidth(103);
 
-    local playerNameLabel = AceGUI:Create("Label");
-    local classColor = RAID_CLASS_COLORS[playerData.class:upper()].colorStr;
-    local playerNameText = "|c" .. classColor .. playerName .. "|r";
-    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t";
+    local playerNameLabel = AceGUI:Create("Label")
+    local classColor = RAID_CLASS_COLORS[playerData.class:upper()].colorStr
+    local playerNameText = "|c" .. classColor .. playerName .. "|r"
+    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t"
 
-    playerNameLabel:SetText(classIcon .. " " .. playerNameText);
-    playerNameLabel:SetRelativeWidth(0.2);
+    playerNameLabel:SetText(classIcon .. " " .. playerNameText)
+    playerNameLabel:SetWidth(80)
 
-    local roleDropdown = AceGUI:Create("Dropdown");
+    local roleDropdown = AceGUI:Create("Dropdown")
     roleDropdown:SetList({
         tank = "Tank",
         healer = "Healer",
         melee_dps = "Melee",
         ranged_dps = "Ranged"
-    });
-    roleDropdown:SetValue(playerData.role);
-    roleDropdown:SetWidth(80);
+    })
+    roleDropdown:SetValue(playerData.role)
+    roleDropdown:SetWidth(80)
     roleDropdown:SetCallback("OnValueChanged", function(widget, event, value)
-        playerData.role = value;
-        GroupBuilder.UpdateGUI();
+        playerData.role = value
+        GroupBuilder.UpdateGUI()
     end)
 
-    local playerDataLabel = AceGUI:Create("Label");
-    playerDataLabel:SetText(tostring(playerData.gearscore) .. " gs");
-    playerDataLabel:SetRelativeWidth(0.7);
+    local gearscoreEditBox = AceGUI:Create("EditBox")
+    gearscoreEditBox:SetLabel("Gearscore")
+    gearscoreEditBox:SetText(tostring(playerData.gearscore))
+    gearscoreEditBox:SetWidth(80)
+    gearscoreEditBox:SetCallback("OnEnterPressed", function(widget, event, text)
+        playerData.gearscore = tonumber(text) or 0
+        GroupBuilder.UpdateGUI()
+    end)
 
-    local kickButton = AceGUI:Create("Button");
-    kickButton:SetText("Kick");
-    kickButton:SetWidth(60);
+    local kickButton = AceGUI:Create("Button")
+    kickButton:SetText("Kick")
+    kickButton:SetWidth(80)
     kickButton:SetCallback("OnClick", function()
-        StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"].text = "Are you sure you want to kick " .. playerName .. " from the raid?";
+        StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"].text = "Are you sure you want to kick " .. playerName .. " from the raid?"
         StaticPopupDialogs["ARE_YOU_SURE_YOU_WANT_TO_KICK"].OnAccept = function ()
-            UninviteUnit(playerName);
+            UninviteUnit(playerName)
             GroupBuilder.db.profile.raidTable[playerName] = nil;
             GroupBuilder.db.profile.inviteConstruction[playerName] = nil;
-            GroupBuilder:UpdateGUI();
+            
+            GroupBuilder.UpdateGUI();
+            GroupBuilder:DoLayout();
         end
-        StaticPopup_Show("ARE_YOU_SURE_YOU_WANT_TO_KICK");
-    end);
+        StaticPopup_Show("ARE_YOU_SURE_YOU_WANT_TO_KICK")
+    end)
 
-    group:AddChild(playerNameLabel);
-    group:AddChild(roleDropdown);
-    group:AddChild(GroupBuilder:CreateMargin());
-    group:AddChild(playerDataLabel);
-    group:AddChild(GroupBuilder:CreateMargin());
-    group:AddChild(kickButton);
+    playerGroup:AddChild(playerNameLabel)
+    playerGroup:AddChild(roleDropdown)
+    playerGroup:AddChild(gearscoreEditBox)
+    playerGroup:AddChild(kickButton)
 
-    return group;
+    return playerGroup
 end
+
 
 function GroupBuilder:CreateCounterLabel(count, maxCount)
     return string.format("(%d/%d)", count, maxCount);
@@ -187,8 +206,6 @@ function GroupBuilder:UpdateGUI()
     if GroupBuilder.db.profile.raidTable then
         for playerName, playerData in pairs(GroupBuilder.db.profile.raidTable) do
             local playerInfoWidget = CreatePlayerWidget(playerName, playerData);
-            playerInfoWidget:SetFullWidth(true);
-            
             if playerData.role == "tank" then
                 tankGroup:AddChild(playerInfoWidget);
             elseif playerData.role == "ranged_dps" or playerData.role == "melee_dps" then
@@ -227,6 +244,6 @@ local addPlayerButton = AceGUI:Create("Button")
 addPlayerButton:SetText("Add Player")
 addPlayerButton:SetCallback("OnClick", ShowAddPlayerDialog)
 
-GroupBuilder.GUIFrame:AddChild(addPlayerButton)
+mainScrollFrame:AddChild(addPlayerButton)
 
 GroupBuilder.GUIFrame:Hide();
