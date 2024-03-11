@@ -21,31 +21,57 @@ dpsGroup:SetTitle("DPS");
 GroupBuilder.GUIFrame:AddChild(dpsGroup);
 
 local function CreatePlayerWidget(playerName, playerData)
-    local group = AceGUI:Create("SimpleGroup");
-    group:SetFullWidth(true);
+    local group = AceGUI:Create("SimpleGroup")
+    group:SetFullWidth(true)
 
-    local playerNameLabel = AceGUI:Create("Label");
-    local classColor = RAID_CLASS_COLORS[playerData.class].colorStr;
-    local playerNameText = "|c" .. classColor .. playerName .. "|r";
+    local playerNameLabel = AceGUI:Create("Label")
+    local classColor = RAID_CLASS_COLORS[playerData.class].colorStr
+    local playerNameText = "|c" .. classColor .. playerName .. "|r"
 
-    playerNameLabel:SetText(playerNameText);
-    playerNameLabel:SetRelativeWidth(0.2);
+    playerNameLabel:SetText(playerNameText)
+    playerNameLabel:SetRelativeWidth(0.2)
 
-    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t";
-    local classIconLabel = AceGUI:Create("Label");
-    classIconLabel:SetText(classIcon);
-    classIconLabel:SetRelativeWidth(0.1);
+    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t"
+    local classIconLabel = AceGUI:Create("Label")
+    classIconLabel:SetText(classIcon)
+    classIconLabel:SetRelativeWidth(0.1)
+
+    local roleDropdown = AceGUI:Create("Dropdown")
+    roleDropdown:SetList({
+        tank = "Tank",
+        healer = "Healer",
+        melee_dps = "Melee DPS",
+        ranged_dps = "Ranged DPS"
+    })
+    roleDropdown:SetValue(playerData.role);
+    roleDropdown:SetWidth(100);
+    roleDropdown:SetCallback("OnValueChanged", function(widget, event, value)
+        playerData.role = value;
+        GroupBuilder.UpdateGUI();
+    end)
 
     local playerDataLabel = AceGUI:Create("Label");
     playerDataLabel:SetText("Role: " .. playerData.role:gsub("_", " ") .. "\n" .. "Gearscore: " .. tostring(playerData.gearscore));
-    playerDataLabel:SetRelativeWidth(0.7);
+    playerDataLabel:SetRelativeWidth(0.6);
+
+    local kickButton = AceGUI:Create("Button");
+    kickButton:SetText("Kick");
+    kickButton:SetWidth(60);
+    kickButton:SetCallback("OnClick", function()
+        UninviteUnit(playerName);
+        GroupBuilder.db.profile.raidTable[playerName] = nil;
+        GroupBuilder.UpdateGUI();
+    end);
 
     group:AddChild(playerNameLabel);
     group:AddChild(classIconLabel);
+    group:AddChild(roleDropdown);
     group:AddChild(playerDataLabel);
+    group:AddChild(kickButton);
 
-    return group;
+    return group
 end
+
 
 function GroupBuilder:CreateCounterLabel(count, maxCount)
     return string.format("(%d/%d)", count, maxCount);
@@ -99,6 +125,8 @@ function GroupBuilder:UpdateGUI()
         dpsLabel:SetFullWidth(true);
         dpsGroup:AddChild(dpsLabel);
     end
+    GroupBuilder.GUIFrame:DoLayout()
+
 end
 
 GroupBuilder.GUIFrame:Hide();

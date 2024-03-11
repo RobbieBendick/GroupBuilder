@@ -884,12 +884,17 @@ function GroupBuilder:OnInitialize()
     GroupBuilder.db = LibStub("AceDB-3.0"):New("GroupBuilderDB", defaults, true);
 
     C_Timer.After(1, function ()
-        if GetNumGroupMembers() == 0 then
-            GroupBuilder.db.profile.raidTable = {};
-            GroupBuilder.db.profile.invitedTable = {};
-            GroupBuilder.db.profile.inviteConstruction = {};
-            GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
-        end
+        -- if GetNumGroupMembers() == 0 then
+            -- GroupBuilder.db.profile.raidTable = {};
+            -- GroupBuilder.db.profile.invitedTable = {};
+            -- GroupBuilder.db.profile.inviteConstruction = {};
+            -- GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
+        -- end
+        -- GroupBuilder.db.profile.raidTable["Floydsr"] = {
+        --     ["role"] = "ranged_dps",
+        --     ["class"] = "MAGE",
+        --     ["gearscore"] = "5500",
+        -- }
         GroupBuilder:UpdateGUI();
     end);
     
