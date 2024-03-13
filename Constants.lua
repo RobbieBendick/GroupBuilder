@@ -70,9 +70,17 @@ GroupBuilder.roles = {
         "spr",
         "shadow",
         "dps priest",
+        "dsp priest",
+        "pds priest",
         "priest dps",
+        "priest pds",
+        "preist pds",
+        "priest dsp",
+
+
 
         "boom",
+        "boomkin",
         "moon",
         "balance",
     },
@@ -114,6 +122,7 @@ GroupBuilder.classAbberviations = {
     ["enh"] = "SHAMAN",
 
     ["boomy"] = "DRUID",
+    ["boomkin"] = "DRUID",
     ["balance"] = "DRUID",
     ["moon"] = "DRUID",
     ["feral"] = "DRUID",

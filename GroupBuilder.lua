@@ -45,18 +45,17 @@ function GroupBuilder:FuzzyFind(message, keyWords, threshold)
 end
 
 function GroupBuilder:FindRole(message)
-    local words = {};
-    for word in message:gmatch("%S+") do
-        table.insert(words, word);
-    end
-
-    -- check for direct matches first
-    for _, word in ipairs(words) do
-        for role, keyWords in pairs(GroupBuilder.roles) do
-            if GroupBuilder:Contains(keyWords, word) then
+    for role, keyWords in pairs(GroupBuilder.roles) do
+        for i, keyWord in pairs(keyWords) do
+            if message:find(keyWord) then
                 return role;
             end
         end
+    end
+
+    local words = {};
+    for word in message:gmatch("%S+") do
+        table.insert(words, word);
     end
 
     -- fuzzy find
@@ -73,18 +72,17 @@ function GroupBuilder:FindRole(message)
 end
 
 function GroupBuilder:FindClass(message)
+
+    -- check for exact matches first
+    for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
+        if message:find(abbreviation) then
+            return className;
+        end
+    end
+
     local words = {}
     for word in message:gmatch("%S+") do
         table.insert(words, word);
-    end
-    
-    -- check for exact matches first
-    for _, word in ipairs(words) do
-        for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
-            if word == abbreviation then
-                return className;
-            end
-        end
     end
     
     -- fuzzy find
