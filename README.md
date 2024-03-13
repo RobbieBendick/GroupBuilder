@@ -9,7 +9,7 @@
     - For instance, one time where we would need clarification on the class is if the message was "Resto". Since Resto could refer to a Shaman or a Druid, we can't infer the class from just "Resto".
   - Messages players back asking for the missing pieces of information that we need. (A maximum of 1 whisper to per player.)
       - Remembers the pieces of information that we need from previous messages.
-  - Looks for slightly misspelled role/classes. via [Levenshtein distance algorithm](https://en.wikipedia.org/wiki/Levenshtein_distance)
+  - Looks for slightly misspelled role/classes ([Levenshtein distance algorithm](https://en.wikipedia.org/wiki/Levenshtein_distance))
 - Available Options
   - Maximum/Minimum of a certain class.
   - Maximum of a certain class/role combo. (healer shaman, ranged dps shaman, etc.)
