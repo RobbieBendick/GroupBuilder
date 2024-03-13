@@ -33,17 +33,13 @@ GroupBuilder.roles = {
 
         "enh",
         "enhance",
-        "ehnanc",
     
         "ret",
 
         "warrior",
         "war",
         "fwar",
-        "war dps",
-        "warr dps",
         "fury",
-        "dps war",
 
         "unh",
         "unholy",
@@ -60,15 +56,13 @@ GroupBuilder.roles = {
         "marks",
         "bm",
         "beast",
-        "baest",
 
         "mage",
         "mag",
         "fire",
         
-        "ele shaman",
+        "ele",
         "elesham",
-        "ele sham",
 
         "warlock",
         "lock",
@@ -78,7 +72,6 @@ GroupBuilder.roles = {
         "dps priest",
         "priest dps",
 
-
         "boom",
         "moon",
         "balance",
@@ -87,6 +80,7 @@ GroupBuilder.roles = {
 
 GroupBuilder.classAbberviations = {
     ["rog"] = "ROGUE",
+    ["rogue"] = "ROGUE",
 
     ["warrior"] = "WARRIOR",
     ["war"] = "WARRIOR",
@@ -129,8 +123,8 @@ GroupBuilder.classAbberviations = {
     ["tree"] = "DRUID",
 
     ["pal"] = "PALADIN",
-    ["holy pa"] = "PALADIN",
-    ["hloy pa"] = "PALADIN",
+    ["pally"] = "PALADIN",
+    ["paladin"] = "PALADIN",
     ["ret"] = "PALADIN",
 }
 
@@ -189,51 +183,6 @@ GroupBuilder.raidInstanceDropdownAcronyms = {
     ["RS 25"] = "Ruby Sanctum 25",
     ["RS 10"] = "Ruby Sanctum 10",
 };
-
-function GroupBuilder:Levenshtein(str1, str2)
-    local len1 = #str1;
-    local len2 = #str2;
-    local matrix = {};
-    
-    for i = 0, len1 do
-        matrix[i] = {};
-        for j = 0, len2 do
-            if i == 0 then
-                matrix[i][j] = j;
-            elseif j == 0 then
-                matrix[i][j] = i;
-            else
-                matrix[i][j] = 0;
-            end
-        end
-    end
-    
-    -- compute the Levenshtein distance
-    for i = 1, len1 do
-        for j = 1, len2 do
-            local cost = (str1:sub(i, i) ~= str2:sub(j, j)) and 1 or 0;
-            matrix[i][j] = math.min(
-                matrix[i-1][j] + 1,
-                matrix[i][j-1] + 1,
-                matrix[i-1][j-1] + cost
-            );
-        end
-    end
-    
-    return matrix[len1][len2];
-end
-
-function GroupBuilder:FuzzyFind(message, keyWords, threshold)
-    local results = {};
-    for _, keyWord in ipairs(keyWords) do
-        local distance = GroupBuilder:Levenshtein(message, keyWord);
-        if distance <= threshold then
-            table.insert(results, keyWord);
-        end
-    end
-    return results;
-end
-
 
 function GroupBuilder:Contains(list, value)
     for _, v in ipairs(list) do

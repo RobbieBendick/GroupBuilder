@@ -101,33 +101,6 @@ function GroupBuilder:RemovePlayerFromRaidTable(name)
     GroupBuilder.db.profile.raidTable[name] = nil;
 end
 
-function GroupBuilder:FindClass(message)
-    local words = {}
-    for word in message:gmatch("%S+") do
-        table.insert(words, word);
-    end
-    
-    -- check for exact matches first
-    for _, word in ipairs(words) do
-        for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
-            if word == abbreviation then
-                return className;
-            end
-        end
-    end
-    
-    for _, word in ipairs(words) do
-        for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
-            local matches = GroupBuilder:FuzzyFind(word, {abbreviation}, (#word > 3 and 2 or (#word == 2 and 0 or 1)));
-            if #matches > 0 then
-                return className;
-            end
-        end
-    end
-
-    return nil;
-end
-
 function GroupBuilder:IncrementCharacterInteractedWith(characterName)
     if GroupBuilder.recentlyInteractedWith[characterName] then
         GroupBuilder.recentlyInteractedWith[characterName] = GroupBuilder.recentlyInteractedWith[characterName] + 1;

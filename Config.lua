@@ -1,8 +1,6 @@
 local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local LibDBIcon = LibStub("LibDBIcon-1.0");
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-GroupBuilder.Config = {};
-local Config = GroupBuilder.Config;
 local GBConfig;
 local _, playerClass = UnitClass("player");
 local raidInstanceDropdownValues = {
@@ -862,8 +860,6 @@ function GroupBuilder:LoadStaticPopups()
     };
 end
 
-
-
 local defaults = {
     profile = {
         maxHealers = "",
@@ -902,7 +898,6 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.inviteConstruction = {};
             GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         end
-        self:Print(GroupBuilder:Levenshtein("tree", "ret"))
         GroupBuilder:UpdateGUI();
     end);
     
