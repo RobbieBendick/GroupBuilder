@@ -902,6 +902,7 @@ function GroupBuilder:OnInitialize()
             GroupBuilder.db.profile.inviteConstruction = {};
             GroupBuilder.db.profile.raidPlayersThatLeftGroup = {};
         end
+        self:Print(GroupBuilder:Levenshtein("tree", "ret"))
         GroupBuilder:UpdateGUI();
     end);
     

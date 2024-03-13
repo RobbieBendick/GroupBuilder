@@ -10,111 +10,53 @@ GroupBuilder.selectedKickPlayer = "";
 GroupBuilder.roles = {
     ["healer"] = {
         "resto",
-        "rseto",
-        "retso",
-
         "rsham",
-        "healer sha",
-        "healer sah",
-        "heal sham",
-        "hael sham",
-        "hael shma",
-        "sham heal",
-        "shma heal",
-        "shaman heal",
-        "shamna heal",
 
-        "rdrru",
         "rdruid",
         "rdru",
-        "rddru",
         "tree",
-        "haeler dru",
-        "hael dru",
-        "heal dru",
-        "healre dru",
-        "hael dru",
-        "dru heal",
-        "dru hae",
-        "druid heal",
-        "druid hae",
-        "dru hae",
-        "dru heal",
-        "drood hea",
-        "droo hea",
+        "healer",
+        "heal",
 
-        "dics",
         "disc",
-        "dsi",
         "dpr",
-        "heal pri",
-        "haeler pri",
-        "healre pri",
-        "priest hea",
-        "pri hea",
-        "preist hea",
-        "prist hea",
-        "perist hea",
-
-        "holy pa",
-        "hpal",
-        "h pal",
-        "h apl",
-        "heal pal",
-        "haeler pal",
-        "healre pal",
-        "pal heal",
-        "pall heal",
-        "pali heal",
-        "palli heal",
-        "pala heal",
-        "pally heal",
     },
     ["tank"] = {
         "prot",
-        "prt",
-        "port",
         "tank",
-        "tnak",
         "blood",
-        "blod",
     },
     ["melee_dps"] = {
         "rogue",
-        "rog",
 
         "feral",
-        "freal",
 
         "enh",
         "enhance",
         "ehnanc",
     
         "ret",
-        "rte",
 
         "warrior",
         "war",
         "fwar",
         "war dps",
         "warr dps",
-        "fuyr",
-        "fruy",
         "fury",
         "dps war",
 
         "unh",
+        "unholy",
         "dk",
         "frost",
-        "frsot",
         "death",
-        "deaht",
     },
     ["ranged_dps"] = {
+        "hunter",
         "hunt",
-        "htun",
-        "hnut",
         "surv",
+        "survival",
+
         "marks",
         "bm",
         "beast",
@@ -122,103 +64,73 @@ GroupBuilder.roles = {
 
         "mage",
         "mag",
-        "maeg",
         "fire",
         
         "ele shaman",
         "elesham",
         "ele sham",
-        "eel sham",
 
         "warlock",
         "lock",
 
         "spr",
-        "shad",
-        "shda",
+        "shadow",
+        "dps priest",
+        "priest dps",
+
 
         "boom",
-        "booy",
         "moon",
-        "mono",
-        "balacn",
         "balance",
-        "blanc",
-        "baalnce",
-
     },
 };
 
 GroupBuilder.classAbberviations = {
-    ["roeg"] = "ROGUE",
     ["rog"] = "ROGUE",
-    ["riog"] = "ROGUE",
 
     ["warrior"] = "WARRIOR",
     ["war"] = "WARRIOR",
 
     ["disc"] = "PRIEST",
-    ["dsi"] = "PRIEST",
-    ["dics"] = "PRIEST",
     ["priest"] = "PRIEST",
-    ["preis"] = "PRIEST",
     ["pri"] = "PRIEST",
     ["dpr"] = "PRIEST",
 
     ["mage"] = "MAGE",
-    ["mag"] = "MAGE",
-    ["maeg"] = "MAGE",
     ["fire"] = "MAGE",
 
     ["hunter"] = "HUNTER",
     ["hunt"] = "HUNTER",
-    ["hnt"] = "HUNTER",
-    ["hutn"] = "HUNTER",
     ["surv"] = "HUNTER",
-    ["sruv"] = "HUNTER",
     ["mark"] = "HUNTER",
     ["bm"] = "HUNTER",
     ["beast"] = "HUNTER",
     
     ["death"] = "DEATHKNIGHT",
-    ["daet"] = "DEATHKNIGHT",
-    ["deaht"] = "DEATHKNIGHT",
     ["dk"] = "DEATHKNIGHT",
     ["unh"] = "DEATHKNIGHT",
     ["frost"] = "DEATHKNIGHT",
-    ["frots"] = "DEATHKNIGHT",
 
     ["warlock"] = "WARLOCK",
     ["lock"] = "WARLOCK",
 
     ["shaman"] = "SHAMAN",
     ["sham"] = "SHAMAN",
-    ["shma"] = "SHAMAN",
     ["ele"] = "SHAMAN",
     ["enh"] = "SHAMAN",
 
-    ["boom"] = "DRUID",
-    ["booy"] = "DRUID",
+    ["boomy"] = "DRUID",
     ["balance"] = "DRUID",
-    ["balac"] = "DRUID",
-    ["blanc"] = "DRUID",
-    ["baalnce"] = "DRUID",
     ["moon"] = "DRUID",
-    ["mono"] = "DRUID",
     ["feral"] = "DRUID",
-    ["freal"] = "DRUID",
-    ["rdriu"] = "DRUID",
     ["rdruid"] = "DRUID",
-    ["rddru"] = "DRUID",
     ["dru"] = "DRUID",
     ["druid"] = "DRUID",
     ["tree"] = "DRUID",
-    ["tere"] = "DRUID",
 
     ["pal"] = "PALADIN",
     ["holy pa"] = "PALADIN",
     ["hloy pa"] = "PALADIN",
-    ["rte pa"] = "PALADIN",
     ["ret"] = "PALADIN",
 }
 
@@ -277,6 +189,50 @@ GroupBuilder.raidInstanceDropdownAcronyms = {
     ["RS 25"] = "Ruby Sanctum 25",
     ["RS 10"] = "Ruby Sanctum 10",
 };
+
+function GroupBuilder:Levenshtein(str1, str2)
+    local len1 = #str1;
+    local len2 = #str2;
+    local matrix = {};
+    
+    for i = 0, len1 do
+        matrix[i] = {};
+        for j = 0, len2 do
+            if i == 0 then
+                matrix[i][j] = j;
+            elseif j == 0 then
+                matrix[i][j] = i;
+            else
+                matrix[i][j] = 0;
+            end
+        end
+    end
+    
+    -- compute the Levenshtein distance
+    for i = 1, len1 do
+        for j = 1, len2 do
+            local cost = (str1:sub(i, i) ~= str2:sub(j, j)) and 1 or 0;
+            matrix[i][j] = math.min(
+                matrix[i-1][j] + 1,
+                matrix[i][j-1] + 1,
+                matrix[i-1][j-1] + cost
+            );
+        end
+    end
+    
+    return matrix[len1][len2];
+end
+
+function GroupBuilder:FuzzyFind(message, keyWords, threshold)
+    local results = {};
+    for _, keyWord in ipairs(keyWords) do
+        local distance = GroupBuilder:Levenshtein(message, keyWord);
+        if distance <= threshold then
+            table.insert(results, keyWord);
+        end
+    end
+    return results;
+end
 
 
 function GroupBuilder:Contains(list, value)

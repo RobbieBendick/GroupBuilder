@@ -2,19 +2,30 @@ local GroupBuilder = LibStub("AceAddon-3.0"):GetAddon("GroupBuilder");
 local Config = GroupBuilder.Config;
 
 function GroupBuilder:FindRole(message)
-    local foundRole;
-    for role, keyWords in pairs(GroupBuilder.roles) do
-        for _, keyWord in ipairs(keyWords) do
-            if message:find(keyWord) then
-                foundRole = role;
-                break;
+    local words = {};
+    for word in message:gmatch("%S+") do
+        table.insert(words, word);
+    end
+
+    -- check for direct matches first
+    for _, word in ipairs(words) do
+        for role, keyWords in pairs(GroupBuilder.roles) do
+            if GroupBuilder:Contains(keyWords, word) then
+                return role;
             end
         end
-        if foundRole then
-            break;
+    end
+
+    for _, word in ipairs(words) do
+        for role, keyWords in pairs(GroupBuilder.roles) do
+            local matches = GroupBuilder:FuzzyFind(word, keyWords, (#word > 3 and 2 or 1));
+            if #matches > 0 then
+                return role;
+            end
         end
     end
-    return foundRole;
+
+    return nil;
 end
 
 function GroupBuilder:FindGearscore(message)
@@ -35,7 +46,7 @@ function GroupBuilder:FindGearscore(message)
                 return nil;
             end
 
-            return gearscoreNumber
+            return gearscoreNumber;
         end
     end
 

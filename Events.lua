@@ -102,11 +102,29 @@ function GroupBuilder:RemovePlayerFromRaidTable(name)
 end
 
 function GroupBuilder:FindClass(message)
-    for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
-        if message:find(abbreviation) then
-            return className;
+    local words = {}
+    for word in message:gmatch("%S+") do
+        table.insert(words, word);
+    end
+    
+    -- check for exact matches first
+    for _, word in ipairs(words) do
+        for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
+            if word == abbreviation then
+                return className;
+            end
         end
     end
+    
+    for _, word in ipairs(words) do
+        for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
+            local matches = GroupBuilder:FuzzyFind(word, {abbreviation}, (#word > 3 and 2 or (#word == 2 and 0 or 1)));
+            if #matches > 0 then
+                return className;
+            end
+        end
+    end
+
     return nil;
 end
 
@@ -171,6 +189,8 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         else
             self:Print("Role not found.");
         end
+    else
+        self:Print("Role is " .. role);
     end
 
     local whispererClass = GroupBuilder:FindClass(message);
@@ -180,6 +200,8 @@ function GroupBuilder:HandleWhispers(event, message, sender, ...)
         else
             self:Print("Class not found.");
         end
+    else
+        self:Print("Class is " .. whispererClass);
     end
 
     if GroupBuilder.db.profile.minGearscore and gearscoreNumber and gearscoreNumber < tonumber(GroupBuilder.db.profile.minGearscore) then
