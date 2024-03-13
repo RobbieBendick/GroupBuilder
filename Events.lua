@@ -323,7 +323,7 @@ function GroupBuilder:HandleGroupRosterUpdate(self, event, ...)
     -- convert to raid
     if not IsInRaid() and GetNumGroupMembers() > 0 then
         C_Timer.After(1, function ()
-            C_PartyInfo.ConvertToRaid();
+            ConvertToRaid();
         end)
     end
 

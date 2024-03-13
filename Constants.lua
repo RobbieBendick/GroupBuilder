@@ -123,7 +123,8 @@ GroupBuilder.roles = {
         "mage",
         "mag",
         "maeg",
-
+        "fire",
+        
         "ele shaman",
         "elesham",
         "ele sham",
@@ -167,6 +168,7 @@ GroupBuilder.classAbberviations = {
     ["mage"] = "MAGE",
     ["mag"] = "MAGE",
     ["maeg"] = "MAGE",
+    ["fire"] = "MAGE",
 
     ["hunter"] = "HUNTER",
     ["hunt"] = "HUNTER",

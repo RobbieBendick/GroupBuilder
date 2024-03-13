@@ -130,7 +130,7 @@ local function CreatePlayerWidget(playerName, playerData)
     local playerNameLabel = AceGUI:Create("Label");
     local classColor = RAID_CLASS_COLORS[playerData.class:upper()].colorStr;
     local playerNameText = "|c" .. classColor .. playerName .. "|r";
-    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":20:20|t";
+    local classIcon = "|TInterface\\icons\\ClassIcon_" .. playerData.class:upper() .. ":15:15|t";
 
     playerNameLabel:SetText(classIcon .. " " .. playerNameText);
     playerNameLabel:SetWidth(80);

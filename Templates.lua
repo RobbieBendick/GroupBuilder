@@ -163,8 +163,6 @@ function GroupBuilder:VaultOfArchavon10Template()
     GroupBuilder:UpdateGUI();
 end
 
-
-
 GroupBuilder.raidTemplates = {
     ["Reset"] = GroupBuilder.ResetTemplate,
     ["Icecrown Citadel 25"] = GroupBuilder.IcecrownCitadel25Template,
