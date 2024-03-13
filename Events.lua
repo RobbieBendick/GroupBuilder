@@ -114,9 +114,9 @@ function GroupBuilder:SendDelayedMessage(message, characterName)
     if interactedWithTooManyTimes then
         return;
     end
+    self:IncrementCharacterInteractedWith(characterName);
     C_Timer.After(math.random(GroupBuilder.minDelayTime, GroupBuilder.maxDelayTime), function ()
         SendChatMessage(message, "WHISPER", nil, characterName);
-        self:IncrementCharacterInteractedWith(characterName);
     end);
 end
 
