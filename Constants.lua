@@ -77,8 +77,6 @@ GroupBuilder.roles = {
         "preist pds",
         "priest dsp",
 
-
-
         "boom",
         "boomkin",
         "moon",

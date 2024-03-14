@@ -33,15 +33,22 @@ function GroupBuilder:Levenshtein(str1, str2)
     return matrix[len1][len2];
 end
 
+function GroupBuilder:TableLength(table)
+
+end
+
 function GroupBuilder:FuzzyFind(message, keyWords, threshold)
-    local results = {};
+    local closestKeyword, closestKeywordDistance;
     for _, keyWord in ipairs(keyWords) do
         local distance = GroupBuilder:Levenshtein(message, keyWord);
         if distance <= threshold then
-            table.insert(results, keyWord);
+            if closestKeyword == nil or closestKeywordDistance == nil or closestKeywordDistance < distance then
+                closestKeyword = keyWord;
+                closestKeywordDistance = distance;
+            end
         end
     end
-    return results;
+    return closestKeyword;
 end
 
 function GroupBuilder:FindRole(message)
@@ -61,8 +68,8 @@ function GroupBuilder:FindRole(message)
     -- fuzzy find
     for _, word in ipairs(words) do
         for role, keyWords in pairs(GroupBuilder.roles) do
-            local matches = GroupBuilder:FuzzyFind(word, keyWords, (#word > 3 and 2 or 1));
-            if #matches > 0 then
+            local closestMatch = GroupBuilder:FuzzyFind(word, keyWords, (#word > 3 and 2 or 1));
+            if closestMatch then
                 return role;
             end
         end
@@ -88,8 +95,8 @@ function GroupBuilder:FindClass(message)
     -- fuzzy find
     for _, word in ipairs(words) do
         for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
-            local matches = GroupBuilder:FuzzyFind(word, {abbreviation},  (#word > 3 and 2 or 1));
-            if #matches > 0 then
+            local closestMatch = GroupBuilder:FuzzyFind(word, {abbreviation},  (#word > 3 and 2 or 1));
+            if closestMatch then
                 return className;
             end
         end
