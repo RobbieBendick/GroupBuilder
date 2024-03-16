@@ -33,10 +33,6 @@ function GroupBuilder:Levenshtein(str1, str2)
     return matrix[len1][len2];
 end
 
-function GroupBuilder:TableLength(table)
-
-end
-
 function GroupBuilder:FuzzyFind(message, keyWords, threshold)
     local closestKeyword, closestKeywordDistance;
     for _, keyWord in ipairs(keyWords) do
@@ -95,7 +91,7 @@ function GroupBuilder:FindClass(message)
     -- fuzzy find
     for _, word in ipairs(words) do
         for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
-            local closestMatch = GroupBuilder:FuzzyFind(word, {abbreviation},  (#word > 3 and 2 or 1));
+            local closestMatch = GroupBuilder:FuzzyFind(word, {abbreviation}, (#word > 3 and 2 or 1));
             if closestMatch then
                 return className;
             end

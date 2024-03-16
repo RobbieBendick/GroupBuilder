@@ -55,7 +55,7 @@ function GroupBuilder:IcecrownCitadel25Template()
     GroupBuilder.db.profile.maxHealers = 6;
     GroupBuilder.db.profile.maxRangedDPS = 10;
     GroupBuilder.db.profile.maxMeleeDPS = 10;
-    GroupBuilder.db.profile.minGearscore = 5600;
+    GroupBuilder.db.profile.minGearscore = 5800;
     GroupBuilder.db.profile.maxTotalPlayers = 25;
     GroupBuilder.db.profile["healerPRIESTMaximum"] = 1;
     GroupBuilder.db.profile["healerSHAMANMaximum"] = 2;
@@ -76,7 +76,7 @@ function GroupBuilder:IcecrownCitadel10Template()
     GroupBuilder.db.profile.maxHealers = 3;
     GroupBuilder.db.profile.maxRangedDPS = 4;
     GroupBuilder.db.profile.maxMeleeDPS = 4;
-    GroupBuilder.db.profile.minGearscore = 5400;
+    GroupBuilder.db.profile.minGearscore = 5700;
     GroupBuilder.db.profile.maxTotalPlayers = 10;
 
     GroupBuilder:CheckForPlayerRole();
@@ -91,7 +91,7 @@ function GroupBuilder:RubySanctum10Template()
     GroupBuilder.db.profile.maxHealers = 3;
     GroupBuilder.db.profile.maxRangedDPS = 4;
     GroupBuilder.db.profile.maxMeleeDPS = 4;
-    GroupBuilder.db.profile.minGearscore = 5400;
+    GroupBuilder.db.profile.minGearscore = 5700;
     GroupBuilder.db.profile.maxTotalPlayers = 10;
 
     GroupBuilder:CheckForPlayerRole();
@@ -106,7 +106,7 @@ function GroupBuilder:RubySanctum25Template()
     GroupBuilder.db.profile.maxHealers = 6;
     GroupBuilder.db.profile.maxRangedDPS = 10;
     GroupBuilder.db.profile.maxMeleeDPS = 10;
-    GroupBuilder.db.profile.minGearscore = 5600;
+    GroupBuilder.db.profile.minGearscore = 5800;
     GroupBuilder.db.profile.maxTotalPlayers = 25;
 
     GroupBuilder:CheckForPlayerRole();
