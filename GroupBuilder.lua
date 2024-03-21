@@ -48,6 +48,7 @@ function GroupBuilder:FuzzyFind(message, keyWords, threshold)
 end
 
 function GroupBuilder:FindRole(message)
+    -- check for exact matches first
     for role, keyWords in pairs(GroupBuilder.roles) do
         for i, keyWord in pairs(keyWords) do
             if message:find(keyWord) then
@@ -75,7 +76,6 @@ function GroupBuilder:FindRole(message)
 end
 
 function GroupBuilder:FindClass(message)
-
     -- check for exact matches first
     for abbreviation, className in pairs(GroupBuilder.classAbberviations) do
         if message:find(abbreviation) then

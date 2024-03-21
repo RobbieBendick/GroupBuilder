@@ -629,7 +629,7 @@ function GroupBuilder:CreateMenu()
     -- add addon to the Blizzard options panel
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder", "GroupBuilder");
 
-    -- Add the "GroupBuilder_AdvertisingMessage" subcategory under the "Advertising Message" category
+    -- add the "GroupBuilder_AdvertisingMessage" subcategory under the "Advertising Message" category
     self.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GroupBuilder_AdvertisingMessage", "Advertising Message", "GroupBuilder");
     GBConfig:Hide();
 end
