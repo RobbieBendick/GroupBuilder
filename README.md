@@ -10,6 +10,7 @@
   - Messages players back asking for the missing pieces of information that we need. (A maximum of 1 whisper to per player.)
       - Remembers the pieces of information that we need from previous messages.
   - Looks for slightly misspelled role/classes. ([Levenshtein distance algorithm](https://en.wikipedia.org/wiki/Levenshtein_distance))
+  - Intuitive GUI to update, add or remoove players from the Raid Table.
 - Available Options
   - Maximum/Minimum of a certain class.
   - Maximum of a certain class/role combo. (healer shaman, ranged dps shaman, etc.)
